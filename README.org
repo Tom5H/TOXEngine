@@ -1,0 +1,19 @@
+* The TOX Engine
+The TOX Engine is a C++ Vulkan 3D-Engine. It has support for hardware accelerated pathtracing on RTX graphics cards. Currently it is used to explore procedural geometry generators.
+
+** Building from source
+#+begin_src shell
+
+  mkdir build
+  cd build
+  cmake ..
+  cmake --build .
+
+#+end_src
+
+** Third party libraries
+- Vulkan SDK
+- GLFW3
+- GLM
+- stb_image
+- tinyobjloader
