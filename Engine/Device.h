@@ -20,12 +20,13 @@ public:
   VkQueue getPresentQueue() { return presentQueue; }
   VkCommandPool getCommandPool() { return commandPool; }
   void waitIdle();
-  void createCommandPool();
   VkCommandBuffer beginSingleTimeCommands();
   void endSingleTimeCommands(VkCommandBuffer commandBuffer);
-  
+
 private:
-  
+  void create();
+  void createCommandPool();
+
   VkDevice device;
   VkQueue graphicsQueue;
   VkQueue presentQueue;

@@ -29,33 +29,14 @@ PhysicalDevice::PhysicalDevice(TOXEngine *engine) : engine(engine) {
   }
 }
 
-bool PhysicalDevice::hasRequiredFeatures() {
-  QueueFamilyIndices indices = findQueueFamilies();
-
-  bool extensionsSupported = checkDeviceExtensionSupport();
-
-  bool swapChainAdequate = false;
-  if (extensionsSupported) {
-    SwapChainSupportDetails swapChainSupport = querySwapChainSupport();
-    swapChainAdequate = !swapChainSupport.formats.empty() &&
-                        !swapChainSupport.presentModes.empty();
-  }
-
-  VkPhysicalDeviceFeatures supportedFeatures;
-  vkGetPhysicalDeviceFeatures(physicalDevice, &supportedFeatures);
-
-  return indices.isComplete() && extensionsSupported && swapChainAdequate &&
-         supportedFeatures.samplerAnisotropy;
-}
-
 bool PhysicalDevice::checkDeviceExtensionSupport() {
   uint32_t extensionCount;
-  vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr,
-                                       &extensionCount, nullptr);
+  vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensionCount,
+                                       nullptr);
 
   std::vector<VkExtensionProperties> availableExtensions(extensionCount);
-  vkEnumerateDeviceExtensionProperties(
-      physicalDevice, nullptr, &extensionCount, availableExtensions.data());
+  vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensionCount,
+                                       availableExtensions.data());
 
   std::set<std::string> requiredExtensions(deviceExtensions.begin(),
                                            deviceExtensions.end());
@@ -130,4 +111,42 @@ SwapChainSupportDetails PhysicalDevice::querySwapChainSupport() {
   }
 
   return details;
+}
+
+VkFormat PhysicalDevice::findSupportedFormat(const std::vector<VkFormat> &candidates,
+                             VkImageTiling tiling,
+                             VkFormatFeatureFlags features) {
+  for (VkFormat format : candidates) {
+    VkFormatProperties props;
+    vkGetPhysicalDeviceFormatProperties(physicalDevice, format, &props);
+
+    if (tiling == VK_IMAGE_TILING_LINEAR &&
+        (props.linearTilingFeatures & features) == features) {
+      return format;
+    } else if (tiling == VK_IMAGE_TILING_OPTIMAL &&
+               (props.optimalTilingFeatures & features) == features) {
+      return format;
+    }
+  }
+
+  throw std::runtime_error("failed to find supported format!");
+}
+
+bool PhysicalDevice::hasRequiredFeatures() {
+  QueueFamilyIndices indices = findQueueFamilies();
+
+  bool extensionsSupported = checkDeviceExtensionSupport();
+
+  bool swapChainAdequate = false;
+  if (extensionsSupported) {
+    SwapChainSupportDetails swapChainSupport = querySwapChainSupport();
+    swapChainAdequate = !swapChainSupport.formats.empty() &&
+                        !swapChainSupport.presentModes.empty();
+  }
+
+  VkPhysicalDeviceFeatures supportedFeatures;
+  vkGetPhysicalDeviceFeatures(physicalDevice, &supportedFeatures);
+
+  return indices.isComplete() && extensionsSupported && swapChainAdequate &&
+         supportedFeatures.samplerAnisotropy;
 }

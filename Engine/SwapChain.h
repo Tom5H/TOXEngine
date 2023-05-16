@@ -1,0 +1,85 @@
+#ifndef TOXENGINE_SWAPCHAIN_H_
+#define TOXENGINE_SWAPCHAIN_H_
+
+#include "PhysicalDevice.h"
+#include <cstdint>
+#include <vulkan/vulkan.h>
+
+#include <vector>
+#include <vulkan/vulkan_core.h>
+
+class TOXEngine;
+
+class SwapChain {
+public:
+  SwapChain(TOXEngine *engine);
+  ~SwapChain();
+
+  VkSwapchainKHR get() { return swapChain; }
+  uint32_t width() { return swapChainExtent.width; }
+  uint32_t height() { return swapChainExtent.height; }
+  VkDescriptorSetLayout getDescriptorSetLayout() { return descriptorSetLayout; }
+
+  void create();
+  void cleanup();
+  void recreate();
+
+  void drawFrame();
+  void setFramebufferResized() { framebufferResized = true; }
+  void createDescriptorSets();
+
+private:
+  VkSurfaceFormatKHR chooseSwapSurfaceFormat(
+      const std::vector<VkSurfaceFormatKHR> &availableFormats);
+  VkPresentModeKHR chooseSwapPresentMode(
+      const std::vector<VkPresentModeKHR> &availablePresentModes);
+  VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities);
+  void createImageViews();
+  void createRenderPass();
+  void createDescriptorSetLayout();
+  void createGraphicsPipeline();
+  void createDepthResources();
+  VkFormat findDepthFormat();
+  void createFramebuffers();
+  void createUniformBuffers();
+  void createDescriptorPool();
+  void createCommandBuffers();
+  void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
+  void createSyncObjects();
+
+  TOXEngine *engine;
+  VkSwapchainKHR swapChain;
+  std::vector<VkImage> swapChainImages;
+  VkFormat swapChainImageFormat;
+  VkExtent2D swapChainExtent;
+  std::vector<VkImageView> swapChainImageViews;
+  std::vector<VkFramebuffer> swapChainFramebuffers;
+
+  VkRenderPass renderPass;
+  VkDescriptorSetLayout descriptorSetLayout;
+  VkPipelineLayout pipelineLayout;
+  VkPipeline graphicsPipeline;
+
+  VkImage depthImage;
+  VkDeviceMemory depthImageMemory;
+  VkImageView depthImageView;
+
+  std::vector<VkBuffer> uniformBuffers;
+  std::vector<VkDeviceMemory> uniformBuffersMemory;
+  std::vector<void *> uniformBuffersMapped;
+
+  VkDescriptorPool descriptorPool;
+  std::vector<VkDescriptorSet> descriptorSets;
+
+  std::vector<VkCommandBuffer> commandBuffers;
+
+  std::vector<VkSemaphore> imageAvailableSemaphores;
+  std::vector<VkSemaphore> renderFinishedSemaphores;
+  std::vector<VkFence> inFlightFences;
+
+  uint32_t currentFrame = 0;
+
+  bool framebufferResized = false;
+};
+
+#endif // TOXENGINE_SWAPCHAIN_H_

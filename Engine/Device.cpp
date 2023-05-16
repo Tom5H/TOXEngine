@@ -7,6 +7,11 @@
 
 Device::Device(std::shared_ptr<PhysicalDevice> physicalDevice)
     : physicalDevice(physicalDevice) {
+  create();
+  createCommandPool();
+}
+
+void Device::create() {
   QueueFamilyIndices indices = physicalDevice->findQueueFamilies();
 
   std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
