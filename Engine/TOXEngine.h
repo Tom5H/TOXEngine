@@ -118,10 +118,6 @@ public:
   VkSampler textureSampler;
 
   std::shared_ptr<Model> model; // todo this should be an array of models (scene)
-  //std::vector<Vertex> vertices;
-  //std::vector<uint32_t> indices;
-  //std::shared_ptr<Buffer> vertexBuffer;
-  //std::shared_ptr<Buffer> indexBuffer;
 private:
   void initVulkan() {
     physicalDevice = std::make_shared<PhysicalDevice>(context);
@@ -131,8 +127,6 @@ private:
     createTextureImageView();
     createTextureSampler();
     model = std::make_shared<Model>(this, MODEL_PATH);
-    //createVertexBuffer();
-    //createIndexBuffer();
     swapChain->createDescriptorSets();
   }
 
@@ -213,12 +207,6 @@ private:
     }
 
     Buffer stagingBuffer(this, Buffer::Type::Staging, imageSize);
-    // VkBuffer stagingBuffer;
-    // VkDeviceMemory stagingBufferMemory;
-    // createBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-    //              VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-    //                  VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-    //              stagingBuffer, stagingBufferMemory);
 
     void *data;
     vkMapMemory(device->get(), stagingBuffer.getDeviceMemory(), 0, imageSize, 0,
@@ -243,8 +231,6 @@ private:
                           VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                           VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
-    // vkDestroyBuffer(device->get(), stagingBuffer, nullptr);
-    // vkFreeMemory(device->get(), stagingBufferMemory, nullptr);
   }
 
   void createTextureImageView() {

@@ -53,12 +53,6 @@ void Model::createVertexBuffer(std::vector<Vertex> &vertices) {
   VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
 
   Buffer stagingBuffer(engine, Buffer::Type::Staging, bufferSize);
-  // VkBuffer stagingBuffer;
-  // VkDeviceMemory stagingBufferMemory;
-  // createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-  //              VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-  //                  VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-  //              stagingBuffer, stagingBufferMemory);
 
   void *data;
   vkMapMemory(engine->getDevice()->get(), stagingBuffer.getDeviceMemory(), 0, bufferSize, 0,
@@ -68,29 +62,14 @@ void Model::createVertexBuffer(std::vector<Vertex> &vertices) {
 
   vertexBuffer =
       std::make_shared<Buffer>(engine, Buffer::Type::Vertex, bufferSize);
-  // createBuffer(
-  //     bufferSize,
-  //     VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-  //     VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertexBuffer,
-  //     vertexBufferMemory);
 
   vertexBuffer->copy(stagingBuffer, bufferSize);
-  // copyBuffer(stagingBuffer, vertexBuffer, bufferSize);
-
-  // vkDestroyBuffer(device->get(), stagingBuffer, nullptr);
-  // vkFreeMemory(device->get(), stagingBufferMemory, nullptr);
 }
 
 void Model::createIndexBuffer() {
   VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
 
   Buffer stagingBuffer(engine, Buffer::Type::Staging, bufferSize);
-  // VkBuffer stagingBuffer;
-  // VkDeviceMemory stagingBufferMemory;
-  // createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-  //              VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-  //                  VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-  //              stagingBuffer, stagingBufferMemory);
 
   void *data;
   vkMapMemory(engine->getDevice()->get(), stagingBuffer.getDeviceMemory(), 0, bufferSize, 0,
@@ -99,14 +78,6 @@ void Model::createIndexBuffer() {
   vkUnmapMemory(engine->getDevice()->get(), stagingBuffer.getDeviceMemory());
 
   indexBuffer = std::make_shared<Buffer>(engine, Buffer::Type::Index, bufferSize);
-  // createBuffer(
-  //     bufferSize,
-  //     VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-  //     VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, indexBufferMemory);
 
   indexBuffer->copy(stagingBuffer, bufferSize);
-  // copyBuffer(stagingBuffer, indexBuffer, bufferSize);
-
-  // vkDestroyBuffer(device->get(), stagingBuffer, nullptr);
-  // vkFreeMemory(device->get(), stagingBufferMemory, nullptr);
 }
