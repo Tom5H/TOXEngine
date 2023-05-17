@@ -48,7 +48,7 @@ bool PhysicalDevice::checkDeviceExtensionSupport() {
   return requiredExtensions.empty();
 }
 
-QueueFamilyIndices PhysicalDevice::findQueueFamilies() {
+PhysicalDevice::QueueFamilyIndices PhysicalDevice::findQueueFamilies() {
   QueueFamilyIndices indices;
 
   uint32_t queueFamilyCount = 0;

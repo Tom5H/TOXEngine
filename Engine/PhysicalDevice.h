@@ -1,9 +1,11 @@
 #ifndef TOXENGINE_PHYSICALDEVICE_H_
 #define TOXENGINE_PHYSICALDEVICE_H_
 
-#include <cstdint>
-#include <vector>
 #include <vulkan/vulkan.h>
+
+#include <cstdint>
+#include <optional>
+#include <vector>
 
 class Context;
 struct QueueFamilyIndices;
@@ -11,6 +13,15 @@ struct SwapChainSupportDetails;
 
 class PhysicalDevice {
 public:
+  struct QueueFamilyIndices {
+    std::optional<uint32_t> graphicsFamily;
+    std::optional<uint32_t> presentFamily;
+
+    bool isComplete() {
+      return graphicsFamily.has_value() && presentFamily.has_value();
+    }
+  };
+
   PhysicalDevice(Context &context);
   ~PhysicalDevice() {}
 
@@ -18,7 +29,8 @@ public:
   bool checkDeviceExtensionSupport();
   QueueFamilyIndices findQueueFamilies();
   SwapChainSupportDetails querySwapChainSupport();
-  uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
+  uint32_t findMemoryType(uint32_t typeFilter,
+                          VkMemoryPropertyFlags properties);
   VkFormat findSupportedFormat(const std::vector<VkFormat> &candidates,
                                VkImageTiling tiling,
                                VkFormatFeatureFlags features);

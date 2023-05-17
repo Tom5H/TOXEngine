@@ -12,7 +12,7 @@ Device::Device(std::shared_ptr<PhysicalDevice> physicalDevice)
 }
 
 void Device::create() {
-  QueueFamilyIndices indices = physicalDevice->findQueueFamilies();
+  PhysicalDevice::QueueFamilyIndices indices = physicalDevice->findQueueFamilies();
 
   std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
   std::set<uint32_t> uniqueQueueFamilies = {indices.graphicsFamily.value(),
@@ -69,7 +69,7 @@ Device::~Device() {
 void Device::waitIdle() { vkDeviceWaitIdle(device); }
 
 void Device::createCommandPool() {
-  QueueFamilyIndices queueFamilyIndices = physicalDevice->findQueueFamilies();
+  PhysicalDevice::QueueFamilyIndices queueFamilyIndices = physicalDevice->findQueueFamilies();
 
   VkCommandPoolCreateInfo poolInfo{};
   poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
