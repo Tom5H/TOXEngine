@@ -22,6 +22,12 @@ public:
     }
   };
 
+  struct SwapChainSupportDetails {
+    VkSurfaceCapabilitiesKHR capabilities;
+    std::vector<VkSurfaceFormatKHR> formats;
+    std::vector<VkPresentModeKHR> presentModes;
+  };
+
   PhysicalDevice(Context &context);
   ~PhysicalDevice() {}
 

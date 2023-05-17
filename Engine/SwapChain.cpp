@@ -39,7 +39,7 @@ SwapChain::~SwapChain() {
 }
 
 void SwapChain::create() {
-  SwapChainSupportDetails swapChainSupport =
+  PhysicalDevice::SwapChainSupportDetails swapChainSupport =
       engine->getPhysicalDevice()->querySwapChainSupport();
 
   VkSurfaceFormatKHR surfaceFormat =

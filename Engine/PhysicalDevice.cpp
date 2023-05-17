@@ -83,7 +83,7 @@ PhysicalDevice::QueueFamilyIndices PhysicalDevice::findQueueFamilies() {
   return indices;
 }
 
-SwapChainSupportDetails PhysicalDevice::querySwapChainSupport() {
+PhysicalDevice::SwapChainSupportDetails PhysicalDevice::querySwapChainSupport() {
   SwapChainSupportDetails details;
 
   vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
