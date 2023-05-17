@@ -610,17 +610,17 @@ void SwapChain::recordCommandBuffer(VkCommandBuffer commandBuffer,
   scissor.extent = swapChainExtent;
   vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-  VkBuffer vertexBuffers[] = {engine->vertexBuffer->get()};
+  VkBuffer vertexBuffers[] = {engine->model->vertexBuffer->get()};
   VkDeviceSize offsets[] = {0};
   vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 
-  vkCmdBindIndexBuffer(commandBuffer, engine->indexBuffer->get(), 0, VK_INDEX_TYPE_UINT32);
+  vkCmdBindIndexBuffer(commandBuffer, engine->model->indexBuffer->get(), 0, VK_INDEX_TYPE_UINT32);
 
   vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
                           pipelineLayout, 0, 1, &descriptorSets[currentFrame],
                           0, nullptr);
 
-  vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(engine->indices.size()), 1, 0,
+  vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(engine->model->indices.size()), 1, 0,
                    0, 0);
 
   vkCmdEndRenderPass(commandBuffer);

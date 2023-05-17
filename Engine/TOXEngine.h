@@ -5,10 +5,10 @@
 #include "Buffer.h"
 #include "Context.h"
 #include "Device.h"
+#include "Model.h"
 #include "PhysicalDevice.h"
 #include "SwapChain.h"
 #include "Vertex.h"
-#include <vulkan/vulkan_core.h>
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -21,7 +21,6 @@
 #include <glm/gtx/hash.hpp>
 
 #include <stb_image.h>
-#include <tiny_obj_loader.h>
 
 #include <algorithm>
 #include <array>
@@ -118,10 +117,11 @@ public:
   VkImageView textureImageView;
   VkSampler textureSampler;
 
-  std::vector<Vertex> vertices;
-  std::vector<uint32_t> indices;
-  std::shared_ptr<Buffer> vertexBuffer;
-  std::shared_ptr<Buffer> indexBuffer;
+  std::shared_ptr<Model> model; // todo this should be an array of models (scene)
+  //std::vector<Vertex> vertices;
+  //std::vector<uint32_t> indices;
+  //std::shared_ptr<Buffer> vertexBuffer;
+  //std::shared_ptr<Buffer> indexBuffer;
 private:
   void initVulkan() {
     physicalDevice = std::make_shared<PhysicalDevice>(context);
@@ -130,9 +130,9 @@ private:
     createTextureImage();
     createTextureImageView();
     createTextureSampler();
-    loadModel();
-    createVertexBuffer();
-    createIndexBuffer();
+    model = std::make_shared<Model>(this, MODEL_PATH);
+    //createVertexBuffer();
+    //createIndexBuffer();
     swapChain->createDescriptorSets();
   }
 
@@ -196,10 +196,11 @@ private:
     // glfwTerminate();
   }
 
-  bool hasStencilComponent(VkFormat format) {
-    return format == VK_FORMAT_D32_SFLOAT_S8_UINT ||
-           format == VK_FORMAT_D24_UNORM_S8_UINT;
-  }
+  // unused function
+  //bool hasStencilComponent(VkFormat format) {
+  //  return format == VK_FORMAT_D32_SFLOAT_S8_UINT ||
+  //         format == VK_FORMAT_D24_UNORM_S8_UINT;
+  //}
 
   void createTextureImage() {
     int texWidth, texHeight, texChannels;
@@ -404,106 +405,6 @@ private:
                            VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
 
     device->endSingleTimeCommands(commandBuffer);
-  }
-
-  void loadModel() {
-    tinyobj::attrib_t attrib;
-    std::vector<tinyobj::shape_t> shapes;
-    std::vector<tinyobj::material_t> materials;
-    std::string warn, err;
-
-    if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err,
-                          MODEL_PATH.c_str())) {
-      throw std::runtime_error(warn + err);
-    }
-
-    std::unordered_map<Vertex, uint32_t> uniqueVertices{};
-
-    for (const auto &shape : shapes) {
-      for (const auto &index : shape.mesh.indices) {
-        Vertex vertex{};
-
-        vertex.pos = {attrib.vertices[3 * index.vertex_index + 0],
-                      attrib.vertices[3 * index.vertex_index + 1],
-                      attrib.vertices[3 * index.vertex_index + 2]};
-
-        vertex.texCoord = {attrib.texcoords[2 * index.texcoord_index + 0],
-                           1.0f -
-                               attrib.texcoords[2 * index.texcoord_index + 1]};
-
-        vertex.color = {1.0f, 1.0f, 1.0f};
-
-        if (uniqueVertices.count(vertex) == 0) {
-          uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
-          vertices.push_back(vertex);
-        }
-
-        indices.push_back(uniqueVertices[vertex]);
-      }
-    }
-  }
-
-  void createVertexBuffer() {
-    VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
-
-    Buffer stagingBuffer(this, Buffer::Type::Staging, bufferSize);
-    // VkBuffer stagingBuffer;
-    // VkDeviceMemory stagingBufferMemory;
-    // createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-    //              VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-    //                  VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-    //              stagingBuffer, stagingBufferMemory);
-
-    void *data;
-    vkMapMemory(device->get(), stagingBuffer.getDeviceMemory(), 0, bufferSize,
-                0, &data);
-    memcpy(data, vertices.data(), (size_t)bufferSize);
-    vkUnmapMemory(device->get(), stagingBuffer.getDeviceMemory());
-
-    vertexBuffer =
-        std::make_shared<Buffer>(this, Buffer::Type::Vertex, bufferSize);
-    // createBuffer(
-    //     bufferSize,
-    //     VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-    //     VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertexBuffer,
-    //     vertexBufferMemory);
-
-    vertexBuffer->copy(stagingBuffer, bufferSize);
-    // copyBuffer(stagingBuffer, vertexBuffer, bufferSize);
-
-    // vkDestroyBuffer(device->get(), stagingBuffer, nullptr);
-    // vkFreeMemory(device->get(), stagingBufferMemory, nullptr);
-  }
-
-  void createIndexBuffer() {
-    VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
-
-    Buffer stagingBuffer(this, Buffer::Type::Staging, bufferSize);
-    // VkBuffer stagingBuffer;
-    // VkDeviceMemory stagingBufferMemory;
-    // createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-    //              VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-    //                  VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-    //              stagingBuffer, stagingBufferMemory);
-
-    void *data;
-    vkMapMemory(device->get(), stagingBuffer.getDeviceMemory(), 0, bufferSize,
-                0, &data);
-    memcpy(data, indices.data(), (size_t)bufferSize);
-    vkUnmapMemory(device->get(), stagingBuffer.getDeviceMemory());
-
-    indexBuffer =
-        std::make_shared<Buffer>(this, Buffer::Type::Index, bufferSize);
-    // createBuffer(
-    //     bufferSize,
-    //     VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-    //     VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, indexBufferMemory);
-
-    indexBuffer->copy(stagingBuffer, bufferSize);
-    // copyBuffer(stagingBuffer, indexBuffer, bufferSize);
-
-    // vkDestroyBuffer(device->get(), stagingBuffer, nullptr);
-    // vkFreeMemory(device->get(), stagingBufferMemory, nullptr);
   }
 
 public:
