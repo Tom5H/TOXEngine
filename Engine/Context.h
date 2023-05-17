@@ -19,7 +19,6 @@ public:
   bool framebufferResized = false;
 
 private:
-
   void initWindow();
 
   static void framebufferResizeCallback(GLFWwindow *window, int width,
@@ -47,6 +46,16 @@ private:
 
     return VK_FALSE;
   }
+
+  VkResult CreateDebugUtilsMessengerEXT(
+      VkInstance instance,
+      const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo,
+      const VkAllocationCallbacks *pAllocator,
+      VkDebugUtilsMessengerEXT *pDebugMessenger);
+
+  void DestroyDebugUtilsMessengerEXT(VkInstance instance,
+                                     VkDebugUtilsMessengerEXT debugMessenger,
+                                     const VkAllocationCallbacks *pAllocator);
 };
 
 #endif
