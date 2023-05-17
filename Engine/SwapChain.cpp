@@ -1,10 +1,7 @@
 #include "SwapChain.h"
 
-#include "Buffer.h"
-#include "Image.h"
+#include "Shader.h"
 #include "TOXEngine.h"
-#include "Utils.h"
-#include <memory>
 
 SwapChain::SwapChain(TOXEngine *engine) : engine(engine) {
   create();
@@ -240,24 +237,21 @@ void SwapChain::createDescriptorSetLayout() {
 }
 
 void SwapChain::createGraphicsPipeline() {
-  auto vertShaderCode = readFile("../resources/shaders/vert.spv");
-  auto fragShaderCode = readFile("../resources/shaders/frag.spv");
-
-  VkShaderModule vertShaderModule = engine->createShaderModule(vertShaderCode);
-  VkShaderModule fragShaderModule = engine->createShaderModule(fragShaderCode);
+  Shader vertexShader(engine, "../resources/shaders/vert.spv");
+  Shader fragmentShader(engine, "../resources/shaders/frag.spv");
 
   VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
   vertShaderStageInfo.sType =
       VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
   vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
-  vertShaderStageInfo.module = vertShaderModule;
+  vertShaderStageInfo.module = vertexShader.get();
   vertShaderStageInfo.pName = "main";
 
   VkPipelineShaderStageCreateInfo fragShaderStageInfo{};
   fragShaderStageInfo.sType =
       VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
   fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-  fragShaderStageInfo.module = fragShaderModule;
+  fragShaderStageInfo.module = fragmentShader.get();
   fragShaderStageInfo.pName = "main";
 
   VkPipelineShaderStageCreateInfo shaderStages[] = {vertShaderStageInfo,
@@ -369,9 +363,6 @@ void SwapChain::createGraphicsPipeline() {
                                 &graphicsPipeline) != VK_SUCCESS) {
     throw std::runtime_error("failed to create graphics pipeline!");
   }
-
-  vkDestroyShaderModule(engine->getDevice()->get(), fragShaderModule, nullptr);
-  vkDestroyShaderModule(engine->getDevice()->get(), vertShaderModule, nullptr);
 }
 
 void SwapChain::createDepthResources() {
