@@ -510,7 +510,7 @@ void SwapChain::createDescriptorSets() {
     VkDescriptorImageInfo imageInfo{};
     imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
     imageInfo.imageView = engine->texture->getImageView();
-    imageInfo.sampler = engine->textureSampler;
+    imageInfo.sampler = engine->sampler->get();
 
     std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
 

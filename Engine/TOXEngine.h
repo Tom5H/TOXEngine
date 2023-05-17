@@ -7,6 +7,7 @@
 #include "Device.h"
 #include "Model.h"
 #include "PhysicalDevice.h"
+#include "Sampler.h"
 #include "SwapChain.h"
 #include "Texture.h"
 #include "Vertex.h"
@@ -81,7 +82,7 @@ struct UniformBufferObject {
 class TOXEngine {
 public:
   TOXEngine() : app(this) {}
-  ~TOXEngine() { cleanup(); }
+  ~TOXEngine() {}
 
   App app;
   Context context;
@@ -101,19 +102,19 @@ private:
   std::shared_ptr<SwapChain> swapChain;
 
 public:
+
+  // todo these should be vectors
+  std::shared_ptr<Sampler> sampler;
   std::shared_ptr<Texture> texture;
-
-  VkSampler textureSampler;
-
-  std::shared_ptr<Model>
-      model; // todo this should be an array of models (scene)
+  std::shared_ptr<Model> model;
+  
 private:
   void initVulkan() {
     physicalDevice = std::make_shared<PhysicalDevice>(context);
     device = std::make_shared<Device>(physicalDevice);
     swapChain = std::make_shared<SwapChain>(this);
+    sampler = std::make_shared<Sampler>(this);
     texture = std::make_shared<Texture>(this, TEXTURE_PATH);
-    createTextureSampler();
     model = std::make_shared<Model>(this, MODEL_PATH);
     swapChain->createDescriptorSets();
   }
@@ -125,82 +126,6 @@ private:
     }
 
     device->waitIdle();
-  }
-
-  void cleanup() {
-    // cleanupSwapChain();
-
-    // vkDestroyPipeline(device->get(), graphicsPipeline, nullptr);
-    // vkDestroyPipelineLayout(device->get(), pipelineLayout, nullptr);
-    // vkDestroyRenderPass(device->get(), renderPass, nullptr);
-
-    /*for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-      vkDestroyBuffer(device->get(), uniformBuffers[i], nullptr);
-      vkFreeMemory(device->get(), uniformBuffersMemory[i], nullptr);
-      }*/
-
-    // vkDestroyDescriptorPool(device->get(), descriptorPool, nullptr);
-
-    vkDestroySampler(device->get(), textureSampler, nullptr);
-    //vkDestroyImageView(device->get(), textureImageView, nullptr);
-
-    //vkDestroyImage(device->get(), textureImage, nullptr);
-    //vkFreeMemory(device->get(), textureImageMemory, nullptr);
-
-    // vkDestroyDescriptorSetLayout(device->get(), descriptorSetLayout,
-    // nullptr);
-
-    // vkDestroyBuffer(device->get(), indexBuffer, nullptr);
-    // vkFreeMemory(device->get(), indexBufferMemory, nullptr);
-
-    // vkDestroyBuffer(device->get(), vertexBuffer, nullptr);
-    // vkFreeMemory(device->get(), vertexBufferMemory, nullptr);
-
-    /*for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-      vkDestroySemaphore(device->get(), renderFinishedSemaphores[i], nullptr);
-      vkDestroySemaphore(device->get(), imageAvailableSemaphores[i], nullptr);
-      vkDestroyFence(device->get(), inFlightFences[i], nullptr);
-      }*/
-
-    // vkDestroyCommandPool(device->get(), commandPool, nullptr);
-
-    // vkDestroyDevice(device, nullptr)
-
-    // if (enableValidationLayers) {
-    //   DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
-    // }
-
-    // vkDestroySurfaceKHR(instance, surface, nullptr);
-    // vkDestroyInstance(instance, nullptr);
-
-    // glfwDestroyWindow(window);
-
-    // glfwTerminate();
-  }
-
-  void createTextureSampler() {
-    VkPhysicalDeviceProperties properties{};
-    vkGetPhysicalDeviceProperties(physicalDevice->get(), &properties);
-
-    VkSamplerCreateInfo samplerInfo{};
-    samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-    samplerInfo.magFilter = VK_FILTER_LINEAR;
-    samplerInfo.minFilter = VK_FILTER_LINEAR;
-    samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-    samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-    samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-    samplerInfo.anisotropyEnable = VK_TRUE;
-    samplerInfo.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
-    samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
-    samplerInfo.unnormalizedCoordinates = VK_FALSE;
-    samplerInfo.compareEnable = VK_FALSE;
-    samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
-    samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-
-    if (vkCreateSampler(device->get(), &samplerInfo, nullptr,
-                        &textureSampler) != VK_SUCCESS) {
-      throw std::runtime_error("failed to create texture sampler!");
-    }
   }
 
 public:
