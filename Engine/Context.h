@@ -11,6 +11,7 @@ class Context {
 public:
   Context();
   ~Context();
+
   GLFWwindow *window;
   VkInstance instance;
   VkDebugUtilsMessengerEXT debugMessenger;
@@ -18,25 +19,21 @@ public:
   bool framebufferResized = false;
 
 private:
+
   void initWindow();
 
   static void framebufferResizeCallback(GLFWwindow *window, int width,
                                         int height) {
     auto context =
         reinterpret_cast<Context *>(glfwGetWindowUserPointer(window));
-    context->setFramebufferResized();
+    context->framebufferResized = true;
   }
 
-  void setFramebufferResized() { framebufferResized = true; }
   void createInstance();
-
   void populateDebugMessengerCreateInfo(
       VkDebugUtilsMessengerCreateInfoEXT &createInfo);
-
   void setupDebugMessenger();
-
   void createSurface();
-
   bool checkValidationLayerSupport();
 
   std::vector<const char *> getRequiredExtensions();
