@@ -2,6 +2,8 @@
 
 #include "TOXEngine.h"
 
+#include <cstring>
+
 Context::Context() {
   initWindow();
   createInstance();

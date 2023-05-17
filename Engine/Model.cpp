@@ -3,9 +3,9 @@
 #include "TOXEngine.h"
 #include "Vertex.h"
 
-#include <cstdint>
 #include <tiny_obj_loader.h>
-#include <vector>
+
+#include <cstring>
 
 Model::Model(TOXEngine *engine, const std::string path)
   : engine(engine)

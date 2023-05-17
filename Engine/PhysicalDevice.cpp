@@ -1,8 +1,8 @@
 #include "PhysicalDevice.h"
+
 #include "TOXEngine.h"
 
-#include <stdexcept>
-#include <vector>
+#include <set>
 
 PhysicalDevice::PhysicalDevice(Context &context) : context(context) {
   uint32_t deviceCount = 0;

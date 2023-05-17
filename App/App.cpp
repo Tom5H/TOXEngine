@@ -2,6 +2,9 @@
 
 #include "../Engine/TOXEngine.h"
 
+#include <chrono>
+#include <cstring>
+
 void App::update(void *uniformBufferMapped, uint32_t width, uint32_t height) {
   static auto startTime = std::chrono::high_resolution_clock::now();
 

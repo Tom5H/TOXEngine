@@ -2,8 +2,8 @@
 
 #include "PhysicalDevice.h"
 #include "TOXEngine.h"
-#include <memory>
-#include <vulkan/vulkan_core.h>
+
+#include <set>
 
 Device::Device(std::shared_ptr<PhysicalDevice> physicalDevice)
     : physicalDevice(physicalDevice) {

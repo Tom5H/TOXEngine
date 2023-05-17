@@ -1,9 +1,9 @@
 #ifndef TOXENGINE_IMAGE_H_
 #define TOXENGINE_IMAGE_H_
 
-#include <cstdint>
 #include <vulkan/vulkan.h>
-#include <vulkan/vulkan_core.h>
+
+#include <cstdint>
 
 class TOXEngine;
 

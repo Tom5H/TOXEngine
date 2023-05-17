@@ -10,32 +10,12 @@
 #include "Sampler.h"
 #include "SwapChain.h"
 #include "Texture.h"
-#include "Vertex.h"
-
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtx/hash.hpp>
 
-#include <algorithm>
-#include <array>
-#include <chrono>
-#include <cstdint>
-#include <cstdlib>
-#include <cstring>
-#include <fstream>
-#include <iostream>
-#include <limits>
 #include <memory>
-#include <optional>
-#include <set>
-#include <stdexcept>
-#include <unordered_map>
 #include <vector>
 
 const uint32_t WIDTH = 800;
@@ -72,10 +52,7 @@ public:
   App app;
   Context context;
 
-  void run() {
-    initVulkan();
-    mainLoop();
-  }
+  void run();
 
   std::shared_ptr<PhysicalDevice> getPhysicalDevice() { return physicalDevice; }
   std::shared_ptr<Device> getDevice() { return device; }
@@ -93,24 +70,8 @@ public:
   std::shared_ptr<Model> model;
   
 private:
-  void initVulkan() {
-    physicalDevice = std::make_shared<PhysicalDevice>(context);
-    device = std::make_shared<Device>(physicalDevice);
-    swapChain = std::make_shared<SwapChain>(this);
-    sampler = std::make_shared<Sampler>(this);
-    texture = std::make_shared<Texture>(this, TEXTURE_PATH);
-    model = std::make_shared<Model>(this, MODEL_PATH);
-    swapChain->createDescriptorSets();
-  }
-
-  void mainLoop() {
-    while (!glfwWindowShouldClose(context.window)) {
-      glfwPollEvents();
-      swapChain->drawFrame();
-    }
-
-    device->waitIdle();
-  }
-};
+  void initVulkan();
+  void mainLoop();
+  };
 
 #endif // TOXENGINE_H_

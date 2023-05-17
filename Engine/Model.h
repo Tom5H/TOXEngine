@@ -2,7 +2,6 @@
 #define TOXENGINE_MODEL_H_
 
 #include "Buffer.h"
-#include "SwapChain.h"
 #include "Vertex.h"
 
 #include <memory>

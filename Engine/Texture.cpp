@@ -5,6 +5,8 @@
 
 #include <stb_image.h>
 
+#include <cstring>
+
 Texture::Texture(TOXEngine *engine, const std::string path) : engine(engine) {
   int texWidth, texHeight, texChannels;
   stbi_uc *pixels = stbi_load(path.c_str(), &texWidth, &texHeight,
