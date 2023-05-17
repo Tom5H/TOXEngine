@@ -21,6 +21,8 @@ public:
   void waitIdle();
   VkCommandBuffer beginSingleTimeCommands();
   void endSingleTimeCommands(VkCommandBuffer commandBuffer);
+  VkImageView createImageView(VkImage image, VkFormat format,
+                              VkImageAspectFlags aspectFlags);
 
 private:
   void create();

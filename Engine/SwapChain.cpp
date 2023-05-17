@@ -1,6 +1,7 @@
 #include "SwapChain.h"
 
 #include "Buffer.h"
+#include "Image.h"
 #include "TOXEngine.h"
 #include "Utils.h"
 #include <memory>
@@ -25,11 +26,6 @@ SwapChain::~SwapChain() {
   vkDestroyPipeline(engine->getDevice()->get(), graphicsPipeline, nullptr);
   vkDestroyPipelineLayout(engine->getDevice()->get(), pipelineLayout, nullptr);
   vkDestroyRenderPass(engine->getDevice()->get(), renderPass, nullptr);
-
-  //for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-  //  vkDestroyBuffer(engine->getDevice()->get(), uniformBuffers[i], nullptr);
-  //  vkFreeMemory(engine->getDevice()->get(), uniformBuffersMemory[i], nullptr);
-  //}
 
   vkDestroyDescriptorPool(engine->getDevice()->get(), descriptorPool, nullptr);
 
@@ -106,7 +102,6 @@ void SwapChain::create() {
 
 void SwapChain::cleanup() {
   vkDestroyImageView(engine->getDevice()->get(), depthImageView, nullptr);
-  vkDestroyImage(engine->getDevice()->get(), depthImage, nullptr);
   vkFreeMemory(engine->getDevice()->get(), depthImageMemory, nullptr);
 
   for (auto framebuffer : swapChainFramebuffers) {
@@ -142,7 +137,7 @@ void SwapChain::createImageViews() {
   swapChainImageViews.resize(swapChainImages.size());
 
   for (uint32_t i = 0; i < swapChainImages.size(); i++) {
-    swapChainImageViews[i] = engine->createImageView(
+    swapChainImageViews[i] = engine->getDevice()->createImageView(
         swapChainImages[i], swapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT);
   }
 }
@@ -159,7 +154,10 @@ void SwapChain::createRenderPass() {
   colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
   VkAttachmentDescription depthAttachment{};
-  depthAttachment.format = findDepthFormat();
+  depthAttachment.format = engine->getPhysicalDevice()->findSupportedFormat(
+      {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT,
+       VK_FORMAT_D24_UNORM_S8_UINT},
+      VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
   depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
   depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
   depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
@@ -377,21 +375,11 @@ void SwapChain::createGraphicsPipeline() {
 }
 
 void SwapChain::createDepthResources() {
-  VkFormat depthFormat = findDepthFormat();
-
-  engine->createImage(
-      swapChainExtent.width, swapChainExtent.height, depthFormat,
-      VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
-      VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, depthImage, depthImageMemory);
-  depthImageView = engine->createImageView(depthImage, depthFormat,
-                                           VK_IMAGE_ASPECT_DEPTH_BIT);
-}
-
-VkFormat SwapChain::findDepthFormat() {
-  return engine->getPhysicalDevice()->findSupportedFormat(
-      {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT,
-       VK_FORMAT_D24_UNORM_S8_UINT},
-      VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
+  depthImage =
+      std::make_shared<Image>(engine, swapChainExtent.width,
+                              swapChainExtent.height, Image::Type::Depth);
+  depthImageView = engine->getDevice()->createImageView(
+      depthImage->get(), depthImage->getFormat(), VK_IMAGE_ASPECT_DEPTH_BIT);
 }
 
 void SwapChain::createFramebuffers() {
@@ -467,18 +455,15 @@ void SwapChain::createUniformBuffers() {
   VkDeviceSize bufferSize = sizeof(UniformBufferObject);
 
   uniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
-  //uniformBuffersMemory.resize(MAX_FRAMES_IN_FLIGHT);
   uniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
 
   for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-    uniformBuffers[i] = std::make_shared<Buffer>(engine, Buffer::Type::Uniform, bufferSize);
-    //engine->createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-    //             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-    //                 VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-    //             uniformBuffers[i], uniformBuffersMemory[i]);
+    uniformBuffers[i] =
+        std::make_shared<Buffer>(engine, Buffer::Type::Uniform, bufferSize);
 
-    vkMapMemory(engine->getDevice()->get(), uniformBuffers[i]->getDeviceMemory(), 0,
-                bufferSize, 0, &uniformBuffersMapped[i]);
+    vkMapMemory(engine->getDevice()->get(),
+                uniformBuffers[i]->getDeviceMemory(), 0, bufferSize, 0,
+                &uniformBuffersMapped[i]);
   }
 }
 
@@ -524,7 +509,7 @@ void SwapChain::createDescriptorSets() {
 
     VkDescriptorImageInfo imageInfo{};
     imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    imageInfo.imageView = engine->textureImageView;
+    imageInfo.imageView = engine->texture->getImageView();
     imageInfo.sampler = engine->textureSampler;
 
     std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
@@ -614,13 +599,15 @@ void SwapChain::recordCommandBuffer(VkCommandBuffer commandBuffer,
   VkDeviceSize offsets[] = {0};
   vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 
-  vkCmdBindIndexBuffer(commandBuffer, engine->model->indexBuffer->get(), 0, VK_INDEX_TYPE_UINT32);
+  vkCmdBindIndexBuffer(commandBuffer, engine->model->indexBuffer->get(), 0,
+                       VK_INDEX_TYPE_UINT32);
 
   vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
                           pipelineLayout, 0, 1, &descriptorSets[currentFrame],
                           0, nullptr);
 
-  vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(engine->model->indices.size()), 1, 0,
+  vkCmdDrawIndexed(commandBuffer,
+                   static_cast<uint32_t>(engine->model->indices.size()), 1, 0,
                    0, 0);
 
   vkCmdEndRenderPass(commandBuffer);

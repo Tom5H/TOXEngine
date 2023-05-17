@@ -2,6 +2,7 @@
 #define TOXENGINE_SWAPCHAIN_H_
 
 #include "Buffer.h"
+#include "Image.h"
 
 #include <vulkan/vulkan.h>
 
@@ -39,7 +40,6 @@ private:
   void createDescriptorSetLayout();
   void createGraphicsPipeline();
   void createDepthResources();
-  VkFormat findDepthFormat();
   void createFramebuffers();
   void createUniformBuffers();
   void createDescriptorPool();
@@ -60,12 +60,11 @@ private:
   VkPipelineLayout pipelineLayout;
   VkPipeline graphicsPipeline;
 
-  VkImage depthImage;
+  std::shared_ptr<Image> depthImage;
   VkDeviceMemory depthImageMemory;
   VkImageView depthImageView;
 
   std::vector<std::shared_ptr<Buffer>> uniformBuffers;
-  //std::vector<VkDeviceMemory> uniformBuffersMemory;
   std::vector<void *> uniformBuffersMapped;
 
   VkDescriptorPool descriptorPool;
