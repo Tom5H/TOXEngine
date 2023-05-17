@@ -4,16 +4,16 @@
 #include <stdexcept>
 #include <vector>
 
-PhysicalDevice::PhysicalDevice(TOXEngine *engine) : engine(engine) {
+PhysicalDevice::PhysicalDevice(Context &context) : context(context) {
   uint32_t deviceCount = 0;
-  vkEnumeratePhysicalDevices(engine->getVkInstance(), &deviceCount, nullptr);
+  vkEnumeratePhysicalDevices(context.instance, &deviceCount, nullptr);
 
   if (deviceCount == 0) {
     throw std::runtime_error("failed to find GPUs with Vulkan support!");
   }
 
   std::vector<VkPhysicalDevice> devices(deviceCount);
-  vkEnumeratePhysicalDevices(engine->getVkInstance(), &deviceCount,
+  vkEnumeratePhysicalDevices(context.instance, &deviceCount,
                              devices.data());
 
   for (const auto &device : devices) {
@@ -67,7 +67,7 @@ QueueFamilyIndices PhysicalDevice::findQueueFamilies() {
 
     VkBool32 presentSupport = false;
     vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, i,
-                                         engine->getSurface(), &presentSupport);
+                                         context.surface, &presentSupport);
 
     if (presentSupport) {
       indices.presentFamily = i;
@@ -87,35 +87,51 @@ SwapChainSupportDetails PhysicalDevice::querySwapChainSupport() {
   SwapChainSupportDetails details;
 
   vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
-      physicalDevice, engine->getSurface(), &details.capabilities);
+      physicalDevice, context.surface, &details.capabilities);
 
   uint32_t formatCount;
-  vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, engine->getSurface(),
+  vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, context.surface,
                                        &formatCount, nullptr);
 
   if (formatCount != 0) {
     details.formats.resize(formatCount);
-    vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, engine->getSurface(),
+    vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, context.surface,
                                          &formatCount, details.formats.data());
   }
 
   uint32_t presentModeCount;
   vkGetPhysicalDeviceSurfacePresentModesKHR(
-      physicalDevice, engine->getSurface(), &presentModeCount, nullptr);
+      physicalDevice, context.surface, &presentModeCount, nullptr);
 
   if (presentModeCount != 0) {
     details.presentModes.resize(presentModeCount);
     vkGetPhysicalDeviceSurfacePresentModesKHR(
-        physicalDevice, engine->getSurface(), &presentModeCount,
+        physicalDevice, context.surface, &presentModeCount,
         details.presentModes.data());
   }
 
   return details;
 }
 
-VkFormat PhysicalDevice::findSupportedFormat(const std::vector<VkFormat> &candidates,
-                             VkImageTiling tiling,
-                             VkFormatFeatureFlags features) {
+uint32_t PhysicalDevice::findMemoryType(uint32_t typeFilter,
+                                        VkMemoryPropertyFlags properties) {
+  VkPhysicalDeviceMemoryProperties memProperties;
+  vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memProperties);
+
+  for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++) {
+    if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags &
+                                    properties) == properties) {
+      return i;
+    }
+  }
+
+  throw std::runtime_error("failed to find suitable memory type!");
+}
+
+VkFormat
+PhysicalDevice::findSupportedFormat(const std::vector<VkFormat> &candidates,
+                                    VkImageTiling tiling,
+                                    VkFormatFeatureFlags features) {
   for (VkFormat format : candidates) {
     VkFormatProperties props;
     vkGetPhysicalDeviceFormatProperties(physicalDevice, format, &props);

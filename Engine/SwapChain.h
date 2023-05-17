@@ -1,12 +1,13 @@
 #ifndef TOXENGINE_SWAPCHAIN_H_
 #define TOXENGINE_SWAPCHAIN_H_
 
-#include "PhysicalDevice.h"
-#include <cstdint>
+#include "Buffer.h"
+
 #include <vulkan/vulkan.h>
 
+#include <cstdint>
+#include <memory>
 #include <vector>
-#include <vulkan/vulkan_core.h>
 
 class TOXEngine;
 
@@ -25,7 +26,6 @@ public:
   void recreate();
 
   void drawFrame();
-  void setFramebufferResized() { framebufferResized = true; }
   void createDescriptorSets();
 
 private:
@@ -64,8 +64,8 @@ private:
   VkDeviceMemory depthImageMemory;
   VkImageView depthImageView;
 
-  std::vector<VkBuffer> uniformBuffers;
-  std::vector<VkDeviceMemory> uniformBuffersMemory;
+  std::vector<std::shared_ptr<Buffer>> uniformBuffers;
+  //std::vector<VkDeviceMemory> uniformBuffersMemory;
   std::vector<void *> uniformBuffersMapped;
 
   VkDescriptorPool descriptorPool;
@@ -78,8 +78,6 @@ private:
   std::vector<VkFence> inFlightFences;
 
   uint32_t currentFrame = 0;
-
-  bool framebufferResized = false;
 };
 
 #endif // TOXENGINE_SWAPCHAIN_H_

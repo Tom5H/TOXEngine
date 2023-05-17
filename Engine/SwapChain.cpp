@@ -1,7 +1,9 @@
 #include "SwapChain.h"
 
+#include "Buffer.h"
 #include "TOXEngine.h"
 #include "Utils.h"
+#include <memory>
 
 SwapChain::SwapChain(TOXEngine *engine) : engine(engine) {
   create();
@@ -24,10 +26,10 @@ SwapChain::~SwapChain() {
   vkDestroyPipelineLayout(engine->getDevice()->get(), pipelineLayout, nullptr);
   vkDestroyRenderPass(engine->getDevice()->get(), renderPass, nullptr);
 
-  for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-    vkDestroyBuffer(engine->getDevice()->get(), uniformBuffers[i], nullptr);
-    vkFreeMemory(engine->getDevice()->get(), uniformBuffersMemory[i], nullptr);
-  }
+  //for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+  //  vkDestroyBuffer(engine->getDevice()->get(), uniformBuffers[i], nullptr);
+  //  vkFreeMemory(engine->getDevice()->get(), uniformBuffersMemory[i], nullptr);
+  //}
 
   vkDestroyDescriptorPool(engine->getDevice()->get(), descriptorPool, nullptr);
 
@@ -61,7 +63,7 @@ void SwapChain::create() {
 
   VkSwapchainCreateInfoKHR createInfo{};
   createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-  createInfo.surface = engine->getSurface();
+  createInfo.surface = engine->context.surface;
 
   createInfo.minImageCount = imageCount;
   createInfo.imageFormat = surfaceFormat.format;
@@ -120,9 +122,9 @@ void SwapChain::cleanup() {
 
 void SwapChain::recreate() {
   int width = 0, height = 0;
-  glfwGetFramebufferSize(engine->getWindow(), &width, &height);
+  glfwGetFramebufferSize(engine->context.window, &width, &height);
   while (width == 0 || height == 0) {
-    glfwGetFramebufferSize(engine->getWindow(), &width, &height);
+    glfwGetFramebufferSize(engine->context.window, &width, &height);
     glfwWaitEvents();
   }
 
@@ -445,7 +447,7 @@ SwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities) {
     return capabilities.currentExtent;
   } else {
     int width, height;
-    glfwGetFramebufferSize(engine->getWindow(), &width, &height);
+    glfwGetFramebufferSize(engine->context.window, &width, &height);
 
     VkExtent2D actualExtent = {static_cast<uint32_t>(width),
                                static_cast<uint32_t>(height)};
@@ -465,16 +467,17 @@ void SwapChain::createUniformBuffers() {
   VkDeviceSize bufferSize = sizeof(UniformBufferObject);
 
   uniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
-  uniformBuffersMemory.resize(MAX_FRAMES_IN_FLIGHT);
+  //uniformBuffersMemory.resize(MAX_FRAMES_IN_FLIGHT);
   uniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
 
   for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-    engine->createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-                 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                     VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                 uniformBuffers[i], uniformBuffersMemory[i]);
+    uniformBuffers[i] = std::make_shared<Buffer>(engine, Buffer::Type::Uniform, bufferSize);
+    //engine->createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+    //             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+    //                 VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+    //             uniformBuffers[i], uniformBuffersMemory[i]);
 
-    vkMapMemory(engine->getDevice()->get(), uniformBuffersMemory[i], 0,
+    vkMapMemory(engine->getDevice()->get(), uniformBuffers[i]->getDeviceMemory(), 0,
                 bufferSize, 0, &uniformBuffersMapped[i]);
   }
 }
@@ -515,7 +518,7 @@ void SwapChain::createDescriptorSets() {
 
   for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
     VkDescriptorBufferInfo bufferInfo{};
-    bufferInfo.buffer = uniformBuffers[i];
+    bufferInfo.buffer = uniformBuffers[i]->get();
     bufferInfo.offset = 0;
     bufferInfo.range = sizeof(UniformBufferObject);
 
@@ -607,11 +610,11 @@ void SwapChain::recordCommandBuffer(VkCommandBuffer commandBuffer,
   scissor.extent = swapChainExtent;
   vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-  VkBuffer vertexBuffers[] = {engine->vertexBuffer};
+  VkBuffer vertexBuffers[] = {engine->vertexBuffer->get()};
   VkDeviceSize offsets[] = {0};
   vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 
-  vkCmdBindIndexBuffer(commandBuffer, engine->indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+  vkCmdBindIndexBuffer(commandBuffer, engine->indexBuffer->get(), 0, VK_INDEX_TYPE_UINT32);
 
   vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
                           pipelineLayout, 0, 1, &descriptorSets[currentFrame],
@@ -689,8 +692,8 @@ void SwapChain::drawFrame() {
       vkQueuePresentKHR(engine->getDevice()->getPresentQueue(), &presentInfo);
 
   if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR ||
-      framebufferResized) {
-    framebufferResized = false;
+      engine->context.framebufferResized) {
+    engine->context.framebufferResized = false;
     recreate();
   } else if (result != VK_SUCCESS) {
     throw std::runtime_error("failed to present swap chain image!");
