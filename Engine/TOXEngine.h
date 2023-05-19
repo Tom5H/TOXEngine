@@ -39,19 +39,13 @@ public:
   TOXEngine() : app(this) {}
   ~TOXEngine() {}
 
+  void run();
+
   App app;
   Context context;
 
-  void run();
-
-  //std::shared_ptr<PhysicalDevice> getPhysicalDevice() { return physicalDevice; }
-  //std::shared_ptr<Device> getDevice() { return device; }
-
-private:
-
   std::shared_ptr<SwapChain> swapChain;
 
-public:
   // todo these should be vectors
   std::shared_ptr<Sampler> sampler;
   std::shared_ptr<Texture> texture;
