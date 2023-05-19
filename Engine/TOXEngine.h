@@ -4,9 +4,7 @@
 #include "../App/App.h"
 #include "Buffer.h"
 #include "Context.h"
-#include "Device.h"
 #include "Model.h"
-#include "PhysicalDevice.h"
 #include "Sampler.h"
 #include "SwapChain.h"
 #include "Texture.h"
@@ -23,14 +21,6 @@ const uint32_t HEIGHT = 600;
 
 const std::string MODEL_PATH = "../resources/models/viking_room.obj";
 const std::string TEXTURE_PATH = "../resources/textures/viking_room.png";
-
-const int MAX_FRAMES_IN_FLIGHT = 2;
-
-const std::vector<const char *> validationLayers = {
-    "VK_LAYER_KHRONOS_validation"};
-
-const std::vector<const char *> deviceExtensions = {
-    VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
 #ifdef NDEBUG
 const bool enableValidationLayers = false;
@@ -54,12 +44,10 @@ public:
 
   void run();
 
-  std::shared_ptr<PhysicalDevice> getPhysicalDevice() { return physicalDevice; }
-  std::shared_ptr<Device> getDevice() { return device; }
+  //std::shared_ptr<PhysicalDevice> getPhysicalDevice() { return physicalDevice; }
+  //std::shared_ptr<Device> getDevice() { return device; }
 
 private:
-  std::shared_ptr<PhysicalDevice> physicalDevice;
-  std::shared_ptr<Device> device;
 
   std::shared_ptr<SwapChain> swapChain;
 

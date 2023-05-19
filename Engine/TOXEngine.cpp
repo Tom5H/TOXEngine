@@ -9,12 +9,10 @@ void TOXEngine::run() {
 }
 
 void TOXEngine::initVulkan() {
-  physicalDevice = std::make_shared<PhysicalDevice>(context);
-  device = std::make_shared<Device>(physicalDevice);
-  swapChain = std::make_shared<SwapChain>(this);
-  sampler = std::make_shared<Sampler>(this);
-  texture = std::make_shared<Texture>(this, TEXTURE_PATH);
-  model = std::make_shared<Model>(this, MODEL_PATH);
+  swapChain = std::make_shared<SwapChain>(context, this);
+  sampler = std::make_shared<Sampler>(context);
+  texture = std::make_shared<Texture>(context, TEXTURE_PATH);
+  model = std::make_shared<Model>(context, MODEL_PATH);
   swapChain->createDescriptorSets();
 }
 
@@ -24,5 +22,5 @@ void TOXEngine::mainLoop() {
     swapChain->drawFrame();
   }
 
-  device->waitIdle();
+  context.device->waitIdle();
 }

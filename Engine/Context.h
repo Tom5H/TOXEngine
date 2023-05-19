@@ -1,10 +1,14 @@
 #ifndef TOXENGINE_CONTEXT_H_
 #define TOXENGINE_CONTEXT_H_
 
+#include "Device.h"
+#include "PhysicalDevice.h"
+
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
 #include <iostream>
+#include <memory>
 #include <vector>
 
 class Context {
@@ -12,11 +16,21 @@ public:
   Context();
   ~Context();
 
+  const int MAX_FRAMES_IN_FLIGHT = 2;
+
+  const std::vector<const char *> validationLayers = {
+      "VK_LAYER_KHRONOS_validation"};
+
+  const std::vector<const char *> deviceExtensions = {
+      VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+
   GLFWwindow *window;
+  bool framebufferResized = false;
   VkInstance instance;
   VkDebugUtilsMessengerEXT debugMessenger;
   VkSurfaceKHR surface;
-  bool framebufferResized = false;
+  std::shared_ptr<PhysicalDevice> physicalDevice;
+  std::shared_ptr<Device> device;
 
 private:
   void initWindow();

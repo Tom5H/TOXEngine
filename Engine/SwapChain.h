@@ -10,11 +10,12 @@
 #include <memory>
 #include <vector>
 
+class Context;
 class TOXEngine;
 
 class SwapChain {
 public:
-  SwapChain(TOXEngine *engine);
+  SwapChain(Context &context, TOXEngine *engine);
   ~SwapChain();
 
   VkSwapchainKHR get() { return swapChain; }
@@ -47,6 +48,7 @@ private:
   void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
   void createSyncObjects();
 
+  Context &context;
   TOXEngine *engine;
   VkSwapchainKHR swapChain;
   std::vector<VkImage> swapChainImages;

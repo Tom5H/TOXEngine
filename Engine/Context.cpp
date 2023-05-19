@@ -9,6 +9,8 @@ Context::Context() {
   createInstance();
   setupDebugMessenger();
   createSurface();
+  physicalDevice = std::make_shared<PhysicalDevice>(this);
+  device = std::make_shared<Device>(this, physicalDevice);
 }
 
 Context::~Context() {

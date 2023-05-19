@@ -5,13 +5,13 @@
 
 #include <cstdint>
 
-class TOXEngine;
+class Context;
 
 class Image {
 public:
   enum class Type { Depth, Texture };
 
-  Image(TOXEngine *engine, uint32_t width, uint32_t height, Type type);
+  Image(Context &context, uint32_t width, uint32_t height, Type type);
   ~Image();
 
   VkImage get() { return image; }
@@ -21,7 +21,7 @@ public:
   void copyBuffer(VkBuffer buffer, uint32_t width, uint32_t height);
 
 private:
-  TOXEngine *engine;
+  Context &context;
   VkImage image;
   VkDeviceMemory memory;
   VkFormat format;

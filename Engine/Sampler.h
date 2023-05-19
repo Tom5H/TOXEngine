@@ -3,17 +3,17 @@
 
 #include <vulkan/vulkan.h>
 
-class TOXEngine;
+class Context;
 
 class Sampler {
 public:
-  Sampler(TOXEngine *engine);
+  Sampler(Context &context);
   ~Sampler();
 
   VkSampler get() { return sampler; }
 
 private:
-  TOXEngine *engine;
+  Context &context;
   VkSampler sampler;
 };
 

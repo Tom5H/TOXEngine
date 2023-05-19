@@ -6,17 +6,17 @@
 #include <memory>
 #include <string>
 
-class TOXEngine;
+class Context;
 
 class Texture {
 public:
-  Texture(TOXEngine *engine, const std::string path);
+  Texture(Context &context, const std::string path);
   ~Texture();
 
   VkImageView getImageView() { return imageView; }
   
 private:
-  TOXEngine *engine;
+  Context &context;
   std::shared_ptr<Image> image;
   VkImageView imageView;
 };

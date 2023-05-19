@@ -5,14 +5,15 @@
 
 #include <set>
 
-Device::Device(std::shared_ptr<PhysicalDevice> physicalDevice)
-    : physicalDevice(physicalDevice) {
+Device::Device(Context *context, std::shared_ptr<PhysicalDevice> physicalDevice)
+    : context(context), physicalDevice(physicalDevice) {
   create();
   createCommandPool();
 }
 
 void Device::create() {
-  PhysicalDevice::QueueFamilyIndices indices = physicalDevice->findQueueFamilies();
+  PhysicalDevice::QueueFamilyIndices indices =
+      physicalDevice->findQueueFamilies();
 
   std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
   std::set<uint32_t> uniqueQueueFamilies = {indices.graphicsFamily.value(),
@@ -41,13 +42,13 @@ void Device::create() {
   createInfo.pEnabledFeatures = &deviceFeatures;
 
   createInfo.enabledExtensionCount =
-      static_cast<uint32_t>(deviceExtensions.size());
-  createInfo.ppEnabledExtensionNames = deviceExtensions.data();
+      static_cast<uint32_t>(context->deviceExtensions.size());
+  createInfo.ppEnabledExtensionNames = context->deviceExtensions.data();
 
   if (enableValidationLayers) {
     createInfo.enabledLayerCount =
-        static_cast<uint32_t>(validationLayers.size());
-    createInfo.ppEnabledLayerNames = validationLayers.data();
+        static_cast<uint32_t>(context->validationLayers.size());
+    createInfo.ppEnabledLayerNames = context->validationLayers.data();
   } else {
     createInfo.enabledLayerCount = 0;
   }
@@ -69,7 +70,8 @@ Device::~Device() {
 void Device::waitIdle() { vkDeviceWaitIdle(device); }
 
 void Device::createCommandPool() {
-  PhysicalDevice::QueueFamilyIndices queueFamilyIndices = physicalDevice->findQueueFamilies();
+  PhysicalDevice::QueueFamilyIndices queueFamilyIndices =
+      physicalDevice->findQueueFamilies();
 
   VkCommandPoolCreateInfo poolInfo{};
   poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;

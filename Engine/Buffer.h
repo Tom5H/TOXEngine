@@ -3,7 +3,7 @@
 
 #include <vulkan/vulkan.h>
 
-class TOXEngine;
+class Context;
 
 class Buffer {
 public:
@@ -15,7 +15,7 @@ public:
     Uniform
   };
   
-  Buffer(TOXEngine* engine, Type type, VkDeviceSize size);
+  Buffer(Context &context, Type type, VkDeviceSize size);
   ~Buffer();
 
   VkBuffer get() { return buffer; }
@@ -27,7 +27,7 @@ protected:
   Buffer() = default;
 
 private:
-  TOXEngine *engine;
+  Context &context;
   VkBuffer buffer;
   VkDeviceMemory memory;
 };

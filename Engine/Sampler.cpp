@@ -2,9 +2,9 @@
 
 #include "TOXEngine.h"
 
-Sampler::Sampler(TOXEngine *engine) : engine(engine) {
+Sampler::Sampler(Context &context) : context(context) {
   VkPhysicalDeviceProperties properties{};
-  vkGetPhysicalDeviceProperties(engine->getPhysicalDevice()->get(), &properties);
+  vkGetPhysicalDeviceProperties(context.physicalDevice->get(), &properties);
 
   VkSamplerCreateInfo samplerInfo{};
   samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -21,12 +21,12 @@ Sampler::Sampler(TOXEngine *engine) : engine(engine) {
   samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
   samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
 
-  if (vkCreateSampler(engine->getDevice()->get(), &samplerInfo, nullptr, &sampler) !=
+  if (vkCreateSampler(context.device->get(), &samplerInfo, nullptr, &sampler) !=
       VK_SUCCESS) {
     throw std::runtime_error("failed to create texture sampler!");
   }
 }
 
 Sampler::~Sampler() {
-  vkDestroySampler(engine->getDevice()->get(), sampler, nullptr);
+  vkDestroySampler(context.device->get(), sampler, nullptr);
 }

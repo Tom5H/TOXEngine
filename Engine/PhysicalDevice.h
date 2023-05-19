@@ -28,7 +28,7 @@ public:
     std::vector<VkPresentModeKHR> presentModes;
   };
 
-  PhysicalDevice(Context &context);
+  PhysicalDevice(Context *context);
   ~PhysicalDevice() {}
 
   VkPhysicalDevice get() { return physicalDevice; }
@@ -45,7 +45,7 @@ protected:
   virtual bool hasRequiredFeatures();
 
 private:
-  Context &context;
+  Context *context;
   VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
 };
 

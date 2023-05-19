@@ -8,18 +8,18 @@
 #include <string>
 #include <vector>
 
-class TOXEngine;
+class Context;
 
 class Model {
   friend class SwapChain;
 public:
-  Model(TOXEngine *engine, const std::string path);
+  Model(Context &context, const std::string path);
 
 private:
   void createVertexBuffer(std::vector<Vertex> &vertices);
   void createIndexBuffer();
   
-  TOXEngine *engine;
+  Context &context;
   std::vector<uint32_t> indices;
   std::shared_ptr<Buffer> vertexBuffer;
   std::shared_ptr<Buffer> indexBuffer;

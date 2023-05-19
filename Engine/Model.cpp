@@ -7,8 +7,8 @@
 
 #include <cstring>
 
-Model::Model(TOXEngine *engine, const std::string path)
-  : engine(engine)
+Model::Model(Context &context, const std::string path)
+  : context(context)
 {
   std::vector<Vertex> vertices;
   tinyobj::attrib_t attrib;
@@ -52,16 +52,16 @@ Model::Model(TOXEngine *engine, const std::string path)
 void Model::createVertexBuffer(std::vector<Vertex> &vertices) {
   VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
 
-  Buffer stagingBuffer(engine, Buffer::Type::Staging, bufferSize);
+  Buffer stagingBuffer(context, Buffer::Type::Staging, bufferSize);
 
   void *data;
-  vkMapMemory(engine->getDevice()->get(), stagingBuffer.getDeviceMemory(), 0, bufferSize, 0,
+  vkMapMemory(context.device->get(), stagingBuffer.getDeviceMemory(), 0, bufferSize, 0,
               &data);
   memcpy(data, vertices.data(), (size_t)bufferSize);
-  vkUnmapMemory(engine->getDevice()->get(), stagingBuffer.getDeviceMemory());
+  vkUnmapMemory(context.device->get(), stagingBuffer.getDeviceMemory());
 
   vertexBuffer =
-      std::make_shared<Buffer>(engine, Buffer::Type::Vertex, bufferSize);
+      std::make_shared<Buffer>(context, Buffer::Type::Vertex, bufferSize);
 
   vertexBuffer->copy(stagingBuffer, bufferSize);
 }
@@ -69,15 +69,15 @@ void Model::createVertexBuffer(std::vector<Vertex> &vertices) {
 void Model::createIndexBuffer() {
   VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
 
-  Buffer stagingBuffer(engine, Buffer::Type::Staging, bufferSize);
+  Buffer stagingBuffer(context, Buffer::Type::Staging, bufferSize);
 
   void *data;
-  vkMapMemory(engine->getDevice()->get(), stagingBuffer.getDeviceMemory(), 0, bufferSize, 0,
+  vkMapMemory(context.device->get(), stagingBuffer.getDeviceMemory(), 0, bufferSize, 0,
               &data);
   memcpy(data, indices.data(), (size_t)bufferSize);
-  vkUnmapMemory(engine->getDevice()->get(), stagingBuffer.getDeviceMemory());
+  vkUnmapMemory(context.device->get(), stagingBuffer.getDeviceMemory());
 
-  indexBuffer = std::make_shared<Buffer>(engine, Buffer::Type::Index, bufferSize);
+  indexBuffer = std::make_shared<Buffer>(context, Buffer::Type::Index, bufferSize);
 
   indexBuffer->copy(stagingBuffer, bufferSize);
 }

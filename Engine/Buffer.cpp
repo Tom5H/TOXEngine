@@ -1,10 +1,9 @@
 #include "Buffer.h"
 
 #include "TOXEngine.h"
-#include <vulkan/vulkan_core.h>
 
-Buffer::Buffer(TOXEngine *engine, Type type, VkDeviceSize size)
-    : engine(engine) {
+Buffer::Buffer(Context &context, Type type, VkDeviceSize size)
+    : context(context) {
   VkBufferUsageFlags usage;
   VkMemoryPropertyFlags properties;
   switch (type) {
@@ -39,41 +38,41 @@ Buffer::Buffer(TOXEngine *engine, Type type, VkDeviceSize size)
   bufferInfo.usage = usage;
   bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-  if (vkCreateBuffer(engine->getDevice()->get(), &bufferInfo, nullptr,
+  if (vkCreateBuffer(context.device->get(), &bufferInfo, nullptr,
                      &buffer) != VK_SUCCESS) {
     throw std::runtime_error("failed to create buffer!");
   }
 
   VkMemoryRequirements memRequirements;
-  vkGetBufferMemoryRequirements(engine->getDevice()->get(), buffer,
+  vkGetBufferMemoryRequirements(context.device->get(), buffer,
                                 &memRequirements);
 
   VkMemoryAllocateInfo allocInfo{};
   allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
   allocInfo.allocationSize = memRequirements.size;
-  allocInfo.memoryTypeIndex = engine->getPhysicalDevice()->findMemoryType(
+  allocInfo.memoryTypeIndex = context.physicalDevice->findMemoryType(
       memRequirements.memoryTypeBits, properties);
 
-  if (vkAllocateMemory(engine->getDevice()->get(), &allocInfo, nullptr,
+  if (vkAllocateMemory(context.device->get(), &allocInfo, nullptr,
                        &memory) != VK_SUCCESS) {
     throw std::runtime_error("failed to allocate buffer memory!");
   }
 
-  vkBindBufferMemory(engine->getDevice()->get(), buffer, memory, 0);
+  vkBindBufferMemory(context.device->get(), buffer, memory, 0);
 }
 
 Buffer::~Buffer() {
-  vkDestroyBuffer(engine->getDevice()->get(), buffer, nullptr);
-  vkFreeMemory(engine->getDevice()->get(), memory, nullptr);
+  vkDestroyBuffer(context.device->get(), buffer, nullptr);
+  vkFreeMemory(context.device->get(), memory, nullptr);
 }
 
 void Buffer::copy(Buffer other, VkDeviceSize size) {
   VkCommandBuffer commandBuffer =
-      engine->getDevice()->beginSingleTimeCommands();
+      context.device->beginSingleTimeCommands();
 
   VkBufferCopy copyRegion{};
   copyRegion.size = size;
   vkCmdCopyBuffer(commandBuffer, other.buffer, buffer, 1, &copyRegion);
 
-  engine->getDevice()->endSingleTimeCommands(commandBuffer);
+  context.device->endSingleTimeCommands(commandBuffer);
 }

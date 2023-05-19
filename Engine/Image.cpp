@@ -2,14 +2,14 @@
 #include "TOXEngine.h"
 #include <vulkan/vulkan_core.h>
 
-Image::Image(TOXEngine *engine, uint32_t width, uint32_t height, Type type)
-    : engine(engine) {
+Image::Image(Context &context, uint32_t width, uint32_t height, Type type)
+    : context(context) {
   VkImageTiling tiling;
   VkImageUsageFlags usage;
   VkMemoryPropertyFlags properties;
   switch (type) {
   case Type::Depth:
-    format = engine->getPhysicalDevice()->findSupportedFormat(
+    format = context.physicalDevice->findSupportedFormat(
         {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT,
          VK_FORMAT_D24_UNORM_S8_UINT},
         VK_IMAGE_TILING_OPTIMAL,
@@ -41,41 +41,41 @@ Image::Image(TOXEngine *engine, uint32_t width, uint32_t height, Type type)
   imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
   imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-  if (vkCreateImage(engine->getDevice()->get(), &imageInfo, nullptr, &image) !=
+  if (vkCreateImage(context.device->get(), &imageInfo, nullptr, &image) !=
       VK_SUCCESS) {
     throw std::runtime_error("failed to create image!");
   }
 
   VkMemoryRequirements memRequirements;
-  vkGetImageMemoryRequirements(engine->getDevice()->get(), image,
+  vkGetImageMemoryRequirements(context.device->get(), image,
                                &memRequirements);
 
   VkMemoryAllocateInfo allocInfo{};
   allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
   allocInfo.allocationSize = memRequirements.size;
-  allocInfo.memoryTypeIndex = engine->getPhysicalDevice()->findMemoryType(
+  allocInfo.memoryTypeIndex = context.physicalDevice->findMemoryType(
       memRequirements.memoryTypeBits, properties);
 
-  if (vkAllocateMemory(engine->getDevice()->get(), &allocInfo, nullptr,
+  if (vkAllocateMemory(context.device->get(), &allocInfo, nullptr,
                        &memory) != VK_SUCCESS) {
     throw std::runtime_error("failed to allocate image memory!");
   }
 
-  vkBindImageMemory(engine->getDevice()->get(), image, memory, 0);
+  vkBindImageMemory(context.device->get(), image, memory, 0);
 }
 
 Image::~Image() {
-  vkDestroyImage(engine->getDevice()->get(), image, nullptr);
-  vkFreeMemory(engine->getDevice()->get(), memory, nullptr);
+  vkDestroyImage(context.device->get(), image, nullptr);
+  vkFreeMemory(context.device->get(), memory, nullptr);
 }
 
 VkImageView Image::createImageView(VkImageAspectFlags aspectFlags) {
-  return engine->getDevice()->createImageView(image, format, aspectFlags);
+  return context.device->createImageView(image, format, aspectFlags);
 }
 
 void Image::transitionLayout(VkImageLayout oldLayout, VkImageLayout newLayout) {
   VkCommandBuffer commandBuffer =
-      engine->getDevice()->beginSingleTimeCommands();
+      context.device->beginSingleTimeCommands();
 
   VkImageMemoryBarrier barrier{};
   barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -114,12 +114,12 @@ void Image::transitionLayout(VkImageLayout oldLayout, VkImageLayout newLayout) {
   vkCmdPipelineBarrier(commandBuffer, sourceStage, destinationStage, 0, 0,
                        nullptr, 0, nullptr, 1, &barrier);
 
-  engine->getDevice()->endSingleTimeCommands(commandBuffer);
+  context.device->endSingleTimeCommands(commandBuffer);
 }
 
 void Image::copyBuffer(VkBuffer buffer, uint32_t width, uint32_t height) {
   VkCommandBuffer commandBuffer =
-      engine->getDevice()->beginSingleTimeCommands();
+      context.device->beginSingleTimeCommands();
 
   VkBufferImageCopy region{};
   region.bufferOffset = 0;
@@ -135,5 +135,5 @@ void Image::copyBuffer(VkBuffer buffer, uint32_t width, uint32_t height) {
   vkCmdCopyBufferToImage(commandBuffer, buffer, image,
                          VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &region);
 
-  engine->getDevice()->endSingleTimeCommands(commandBuffer);
+  context.device->endSingleTimeCommands(commandBuffer);
 }

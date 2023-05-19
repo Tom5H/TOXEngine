@@ -7,11 +7,12 @@
 
 #include <memory>
 
+class Context;
 class TOXEngine;
 
 class Device {
 public:
-  Device(std::shared_ptr<PhysicalDevice> physicalDevice);
+  Device(Context *context, std::shared_ptr<PhysicalDevice> physicalDevice);
   ~Device();
 
   VkDevice get() { return device; }
@@ -28,6 +29,7 @@ private:
   void create();
   void createCommandPool();
 
+  Context *context;
   VkDevice device;
   VkQueue graphicsQueue;
   VkQueue presentQueue;

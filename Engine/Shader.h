@@ -5,17 +5,17 @@
 
 #include <string>
 
-class TOXEngine;
+class Context;
 
 class Shader {
 public:
-  Shader(TOXEngine *engine, const std::string path);
+  Shader(Context &context, const std::string path);
   ~Shader();
 
   VkShaderModule get() { return shader; }
 
 private:
-  TOXEngine *engine;
+  Context &context;
   VkShaderModule shader;
 };
 
