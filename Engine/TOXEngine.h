@@ -22,12 +22,6 @@ const uint32_t HEIGHT = 600;
 const std::string MODEL_PATH = "../resources/models/viking_room.obj";
 const std::string TEXTURE_PATH = "../resources/textures/viking_room.png";
 
-#ifdef NDEBUG
-const bool enableValidationLayers = false;
-#else
-const bool enableValidationLayers = true;
-#endif
-
 struct UniformBufferObject {
   alignas(16) glm::mat4 model;
   alignas(16) glm::mat4 view;

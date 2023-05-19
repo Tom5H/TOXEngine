@@ -45,7 +45,7 @@ void Device::create() {
       static_cast<uint32_t>(context->deviceExtensions.size());
   createInfo.ppEnabledExtensionNames = context->deviceExtensions.data();
 
-  if (enableValidationLayers) {
+  if (context->enableValidationLayers) {
     createInfo.enabledLayerCount =
         static_cast<uint32_t>(context->validationLayers.size());
     createInfo.ppEnabledLayerNames = context->validationLayers.data();
