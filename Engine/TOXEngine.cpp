@@ -12,7 +12,9 @@ void TOXEngine::initVulkan() {
   swapChain = std::make_shared<SwapChain>(context, this);
   sampler = std::make_shared<Sampler>(context);
   texture = std::make_shared<Texture>(context, TEXTURE_PATH);
-  model = std::make_shared<Model>(context, MODEL_PATH);
+  // TODO interface function to load models for application (in startup first)
+  // TODO factory selecting Model or RTXModel
+  model = std::make_shared<RTXModel>(context, MODEL_PATH);
   swapChain->createDescriptorSets();
 }
 

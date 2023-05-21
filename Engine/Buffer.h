@@ -3,6 +3,8 @@
 
 #include <vulkan/vulkan.h>
 
+#include <memory>
+
 class Context;
 
 class Buffer {
@@ -12,24 +14,26 @@ public:
     Staging,
     Vertex,
     Index,
-    Uniform
+    Uniform,
+    AccelInput,
+    AccelStorage,
+    ShaderBindingTable
   };
-  
+
   Buffer(Context &context, Type type, VkDeviceSize size);
   ~Buffer();
 
   VkBuffer get() { return buffer; }
   VkDeviceMemory getDeviceMemory() { return memory; }
+  VkDeviceAddress getDeviceAddress() { return deviceAddress; }
 
   void copy(Buffer other, VkDeviceSize size);
-
-protected:
-  Buffer() = default;
 
 private:
   Context &context;
   VkBuffer buffer;
   VkDeviceMemory memory;
+  VkDeviceAddress deviceAddress = 0;
 };
 
 #endif // TOXENGINE_BUFFER_H_

@@ -4,7 +4,7 @@
 #include "../App/App.h"
 #include "Buffer.h"
 #include "Context.h"
-#include "Model.h"
+#include "RTXModel.h"
 #include "Sampler.h"
 #include "SwapChain.h"
 #include "Texture.h"

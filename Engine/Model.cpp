@@ -10,7 +10,6 @@
 Model::Model(Context &context, const std::string path)
   : context(context)
 {
-  std::vector<Vertex> vertices;
   tinyobj::attrib_t attrib;
   std::vector<tinyobj::shape_t> shapes;
   std::vector<tinyobj::material_t> materials;
@@ -45,12 +44,15 @@ Model::Model(Context &context, const std::string path)
     }
   }
 
-  createVertexBuffer(vertices);
+  nbIndices = indices.size();
+  nbVertices = vertices.size();
+
+  createVertexBuffer();
   createIndexBuffer();
 }
 
-void Model::createVertexBuffer(std::vector<Vertex> &vertices) {
-  VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
+void Model::createVertexBuffer() {
+  VkDeviceSize bufferSize = sizeof(vertices[0]) * nbVertices;
 
   Buffer stagingBuffer(context, Buffer::Type::Staging, bufferSize);
 
@@ -67,7 +69,7 @@ void Model::createVertexBuffer(std::vector<Vertex> &vertices) {
 }
 
 void Model::createIndexBuffer() {
-  VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
+  VkDeviceSize bufferSize = sizeof(indices[0]) * nbIndices;
 
   Buffer stagingBuffer(context, Buffer::Type::Staging, bufferSize);
 

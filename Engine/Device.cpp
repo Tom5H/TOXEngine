@@ -3,6 +3,9 @@
 #include "PhysicalDevice.h"
 #include "TOXEngine.h"
 
+#include "vendor/nvvk/extensions_vk.hpp"
+
+#include <cstdint>
 #include <set>
 
 Device::Device(Context *context, std::shared_ptr<PhysicalDevice> physicalDevice)
@@ -57,6 +60,9 @@ void Device::create() {
       VK_SUCCESS) {
     throw std::runtime_error("failed to create logical device!");
   }
+
+  load_VK_EXTENSIONS(context->instance, vkGetInstanceProcAddr, device,
+                     vkGetDeviceProcAddr);
 
   vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);
   vkGetDeviceQueue(device, indices.presentFamily.value(), 0, &presentQueue);

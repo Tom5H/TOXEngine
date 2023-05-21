@@ -19,15 +19,41 @@ Buffer::Buffer(Context &context, Type type, VkDeviceSize size)
     break;
   case Type::Vertex:
     usage =
-        VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+        VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT |
+        VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR |
+        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT |
+        VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
     properties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
     break;
   case Type::Index:
-    usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+    usage =
+        VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT |
+        VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR |
+        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT |
+        VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
     properties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
     break;
   case Type::Uniform:
     usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+    properties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                 VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+    break;
+  case Type::AccelInput:
+    usage =
+        VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR |
+        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT |
+        VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
+    properties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                 VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+    break;
+  case Type::AccelStorage:
+    usage = VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_STORAGE_BIT_KHR |
+            VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
+    properties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+    break;
+  case Type::ShaderBindingTable:
+    usage = VK_BUFFER_USAGE_SHADER_BINDING_TABLE_BIT_KHR |
+            VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
     properties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
                  VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
     break;
@@ -38,8 +64,8 @@ Buffer::Buffer(Context &context, Type type, VkDeviceSize size)
   bufferInfo.usage = usage;
   bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-  if (vkCreateBuffer(context.device->get(), &bufferInfo, nullptr,
-                     &buffer) != VK_SUCCESS) {
+  if (vkCreateBuffer(context.device->get(), &bufferInfo, nullptr, &buffer) !=
+      VK_SUCCESS) {
     throw std::runtime_error("failed to create buffer!");
   }
 
@@ -53,12 +79,22 @@ Buffer::Buffer(Context &context, Type type, VkDeviceSize size)
   allocInfo.memoryTypeIndex = context.physicalDevice->findMemoryType(
       memRequirements.memoryTypeBits, properties);
 
-  if (vkAllocateMemory(context.device->get(), &allocInfo, nullptr,
-                       &memory) != VK_SUCCESS) {
+  if (vkAllocateMemory(context.device->get(), &allocInfo, nullptr, &memory) !=
+      VK_SUCCESS) {
     throw std::runtime_error("failed to allocate buffer memory!");
   }
 
   vkBindBufferMemory(context.device->get(), buffer, memory, 0);
+
+  if (usage & VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT) {
+    VkBufferDeviceAddressInfo bufferDeviceAddressInfo;
+    bufferDeviceAddressInfo.sType =
+        VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO;
+    bufferDeviceAddressInfo.buffer = buffer;
+    bufferDeviceAddressInfo.pNext = NULL;
+    deviceAddress = vkGetBufferDeviceAddress(context.device->get(),
+                                             &bufferDeviceAddressInfo);
+  }
 }
 
 Buffer::~Buffer() {
@@ -67,8 +103,7 @@ Buffer::~Buffer() {
 }
 
 void Buffer::copy(Buffer other, VkDeviceSize size) {
-  VkCommandBuffer commandBuffer =
-      context.device->beginSingleTimeCommands();
+  VkCommandBuffer commandBuffer = context.device->beginSingleTimeCommands();
 
   VkBufferCopy copyRegion{};
   copyRegion.size = size;
