@@ -69,6 +69,10 @@ Buffer::Buffer(Context &context, Type type, VkDeviceSize size)
     throw std::runtime_error("failed to create buffer!");
   }
 
+  VkMemoryAllocateFlagsInfo flagsInfo = {};
+  flagsInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_FLAGS_INFO;
+  flagsInfo.flags = VK_MEMORY_ALLOCATE_DEVICE_ADDRESS_BIT;
+
   VkMemoryRequirements memRequirements;
   vkGetBufferMemoryRequirements(context.device->get(), buffer,
                                 &memRequirements);
@@ -78,6 +82,7 @@ Buffer::Buffer(Context &context, Type type, VkDeviceSize size)
   allocInfo.allocationSize = memRequirements.size;
   allocInfo.memoryTypeIndex = context.physicalDevice->findMemoryType(
       memRequirements.memoryTypeBits, properties);
+  allocInfo.pNext = &flagsInfo;
 
   if (vkAllocateMemory(context.device->get(), &allocInfo, nullptr, &memory) !=
       VK_SUCCESS) {

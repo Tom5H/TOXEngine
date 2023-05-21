@@ -35,8 +35,23 @@ void Device::create() {
   VkPhysicalDeviceFeatures deviceFeatures{};
   deviceFeatures.samplerAnisotropy = VK_TRUE;
 
+  VkPhysicalDeviceBufferDeviceAddressFeatures bda_features = {};
+  bda_features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES;
+  bda_features.bufferDeviceAddress = VK_TRUE;
+
+  VkPhysicalDeviceRayTracingPipelineFeaturesKHR rt_features = {};
+  rt_features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
+  rt_features.rayTracingPipeline = VK_TRUE;
+  rt_features.pNext = &bda_features;
+
+  VkPhysicalDeviceAccelerationStructureFeaturesKHR as_features = {};
+  as_features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
+  as_features.accelerationStructure = VK_TRUE;
+  as_features.pNext = &rt_features;
+  
   VkDeviceCreateInfo createInfo{};
   createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+  createInfo.pNext = &as_features;
 
   createInfo.queueCreateInfoCount =
       static_cast<uint32_t>(queueCreateInfos.size());
