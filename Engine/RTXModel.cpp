@@ -56,11 +56,12 @@ RTXModel::RTXModel(Context &context, const std::string path)
   asInstance.mask = 0xFF;
   asInstance.instanceShaderBindingTableRecordOffset = 0; // (hit group)
 
-  Buffer instancesBuffer(context, Buffer::Type::AccelInput,
-                         sizeof(VkAccelerationStructureInstanceKHR));
+  instancesBuffer =
+      std::make_shared<Buffer>(context, Buffer::Type::AccelInput,
+                               sizeof(VkAccelerationStructureInstanceKHR));
 
   void *mapped;
-  vkMapMemory(context.device->get(), instancesBuffer.getDeviceMemory(), 0,
+  vkMapMemory(context.device->get(), instancesBuffer->getDeviceMemory(), 0,
               sizeof(VkAccelerationStructureInstanceKHR), 0, &mapped);
   memcpy(mapped, &asInstance, sizeof(VkAccelerationStructureInstanceKHR));
 
@@ -68,7 +69,7 @@ RTXModel::RTXModel(Context &context, const std::string path)
   instancesData.sType =
       VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_GEOMETRY_INSTANCES_DATA_KHR;
   instancesData.arrayOfPointers = false;
-  instancesData.data.deviceAddress = instancesBuffer.getDeviceAddress();
+  instancesData.data.deviceAddress = instancesBuffer->getDeviceAddress();
 
   VkAccelerationStructureGeometryKHR instanceGeometry{};
   instanceGeometry.sType =
@@ -76,4 +77,8 @@ RTXModel::RTXModel(Context &context, const std::string path)
   instanceGeometry.geometryType = VK_GEOMETRY_TYPE_INSTANCES_KHR;
   instanceGeometry.geometry.instances = instancesData;
   instanceGeometry.flags = VK_GEOMETRY_OPAQUE_BIT_KHR;
+
+  TLAS = std::make_shared<AccelerationStructure>(
+      context, instanceGeometry, 1,
+      VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_KHR);
 }
