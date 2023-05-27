@@ -20,7 +20,7 @@ public:
   uint32_t getIndexCount() const { return nbIndices; }
   uint32_t getVertexCount() const { return nbVertices; }
 
-protected:
+private:
   Context &context;
 
   std::vector<uint32_t> indices;
@@ -28,7 +28,6 @@ protected:
   std::shared_ptr<Buffer> vertexBuffer;
   std::shared_ptr<Buffer> indexBuffer;
 
-private:
   void createVertexBuffer();
   void createIndexBuffer();
 

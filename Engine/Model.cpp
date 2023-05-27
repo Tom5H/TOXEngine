@@ -7,9 +7,7 @@
 
 #include <cstring>
 
-Model::Model(Context &context, const std::string path)
-  : context(context)
-{
+Model::Model(Context &context, const std::string path) : context(context) {
   tinyobj::attrib_t attrib;
   std::vector<tinyobj::shape_t> shapes;
   std::vector<tinyobj::material_t> materials;
@@ -54,13 +52,8 @@ Model::Model(Context &context, const std::string path)
 void Model::createVertexBuffer() {
   VkDeviceSize bufferSize = sizeof(vertices[0]) * nbVertices;
 
-  Buffer stagingBuffer(context, Buffer::Type::Staging, bufferSize);
-
-  void *data;
-  vkMapMemory(context.device->get(), stagingBuffer.getDeviceMemory(), 0, bufferSize, 0,
-              &data);
-  memcpy(data, vertices.data(), (size_t)bufferSize);
-  vkUnmapMemory(context.device->get(), stagingBuffer.getDeviceMemory());
+  Buffer stagingBuffer(context, Buffer::Type::Staging, bufferSize,
+                       vertices.data());
 
   vertexBuffer =
       std::make_shared<Buffer>(context, Buffer::Type::Vertex, bufferSize);
@@ -71,15 +64,11 @@ void Model::createVertexBuffer() {
 void Model::createIndexBuffer() {
   VkDeviceSize bufferSize = sizeof(indices[0]) * nbIndices;
 
-  Buffer stagingBuffer(context, Buffer::Type::Staging, bufferSize);
+  Buffer stagingBuffer(context, Buffer::Type::Staging, bufferSize,
+                       indices.data());
 
-  void *data;
-  vkMapMemory(context.device->get(), stagingBuffer.getDeviceMemory(), 0, bufferSize, 0,
-              &data);
-  memcpy(data, indices.data(), (size_t)bufferSize);
-  vkUnmapMemory(context.device->get(), stagingBuffer.getDeviceMemory());
-
-  indexBuffer = std::make_shared<Buffer>(context, Buffer::Type::Index, bufferSize);
+  indexBuffer =
+      std::make_shared<Buffer>(context, Buffer::Type::Index, bufferSize);
 
   indexBuffer->copy(stagingBuffer, bufferSize);
 }
