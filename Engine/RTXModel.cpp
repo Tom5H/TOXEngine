@@ -1,20 +1,18 @@
 #include "RTXModel.h"
 
 #include "AccelerationStructure.h"
-#include "Buffer.h"
-#include "Context.h"
-#include "Vertex.h"
 
+#include <tiny_obj_loader.h>
 #include <vulkan/vulkan.h>
 
 #include <array>
 #include <cstdint>
 #include <cstring>
 #include <memory>
-#include <vulkan/vulkan_core.h>
 
 RTXModel::RTXModel(Context &context, const std::string path)
-    : Model(context, path) {
+    : context(context) {
+  load(path);
   VkDeviceAddress vertexAddress = vertexBuffer->getDeviceAddress();
   VkDeviceAddress indexAddress = indexBuffer->getDeviceAddress();
 
@@ -42,8 +40,12 @@ RTXModel::RTXModel(Context &context, const std::string path)
 
   // TLAS
   // TODO to support mulitple models move TLAS out of here
-  VkTransformMatrixKHR transformMatrix{1.0f, 0.0f, 0.0f, 0.0f, ///////
-                                       0.0f, 1.0f, 0.0f, 0.0f, ///////
+  // VkTransformMatrixKHR transformMatrix{0.05f, 0.0f,   0.0f,  0.0f, ///////
+  // 0.0f,  0.0f,   0.05f, 0.0f, ///////
+  //                                   0.0f,  -0.05f, 0.0f,  0.0f};
+
+  VkTransformMatrixKHR transformMatrix{1.0f, 0.0f, 0.0f, 0.0f, //
+                                       0.0f, 1.0f, 0.0f, 0.0f, //
                                        0.0f, 0.0f, 1.0f, 0.0f};
 
   VkAccelerationStructureInstanceKHR asInstance{};
@@ -56,14 +58,9 @@ RTXModel::RTXModel(Context &context, const std::string path)
   asInstance.mask = 0xFF;
   asInstance.instanceShaderBindingTableRecordOffset = 0; // (hit group)
 
-  instancesBuffer =
-      std::make_shared<Buffer>(context, Buffer::Type::AccelInput,
-                               sizeof(VkAccelerationStructureInstanceKHR));
-
-  void *mapped;
-  vkMapMemory(context.device->get(), instancesBuffer->getDeviceMemory(), 0,
-              sizeof(VkAccelerationStructureInstanceKHR), 0, &mapped);
-  memcpy(mapped, &asInstance, sizeof(VkAccelerationStructureInstanceKHR));
+  instancesBuffer = std::make_shared<Buffer>(
+      context, Buffer::Type::AccelInput,
+      sizeof(VkAccelerationStructureInstanceKHR), &asInstance);
 
   VkAccelerationStructureGeometryInstancesDataKHR instancesData{};
   instancesData.sType =
@@ -81,4 +78,72 @@ RTXModel::RTXModel(Context &context, const std::string path)
   TLAS = std::make_shared<AccelerationStructure>(
       context, instanceGeometry, 1,
       VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_KHR);
+}
+
+void RTXModel::load(const std::string path) {
+  tinyobj::attrib_t attrib;
+  std::vector<tinyobj::shape_t> shapes;
+  std::vector<tinyobj::material_t> materials;
+  std::string warn, err;
+
+  if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, path.c_str(),
+                        "../resources/models")) {
+    throw std::runtime_error(warn + err);
+  }
+
+  for (const auto &shape : shapes) {
+    for (const auto &index : shape.mesh.indices) {
+      Vertex vertex{};
+      vertex.pos[0] = attrib.vertices[3 * index.vertex_index + 0];
+      vertex.pos[1] = -attrib.vertices[3 * index.vertex_index + 1];
+      vertex.pos[2] = attrib.vertices[3 * index.vertex_index + 2];
+      vertices.push_back(vertex);
+      indices.push_back(static_cast<uint32_t>(indices.size()));
+    }
+    for (const auto &matIndex : shape.mesh.material_ids) {
+      Face face;
+      face.diffuse[0] = materials[matIndex].diffuse[0];
+      face.diffuse[1] = materials[matIndex].diffuse[1];
+      face.diffuse[2] = materials[matIndex].diffuse[2];
+      face.emission[0] = materials[matIndex].emission[0];
+      face.emission[1] = materials[matIndex].emission[1];
+      face.emission[2] = materials[matIndex].emission[2];
+      faces.push_back(face);
+    }
+  }
+
+  nbIndices = indices.size();
+  nbVertices = vertices.size();
+  nbFaces = faces.size();
+
+  createVertexBuffer();
+  createIndexBuffer();
+  createFaceBuffer();
+}
+
+void RTXModel::createVertexBuffer() {
+  VkDeviceSize bufferSize = sizeof(vertices[0]) * nbVertices;
+  Buffer stagingBuffer(context, Buffer::Type::Staging, bufferSize,
+                       vertices.data());
+  vertexBuffer =
+      std::make_shared<Buffer>(context, Buffer::Type::Vertex, bufferSize);
+  vertexBuffer->copy(stagingBuffer, bufferSize);
+}
+
+void RTXModel::createIndexBuffer() {
+  VkDeviceSize bufferSize = sizeof(indices[0]) * nbIndices;
+  Buffer stagingBuffer(context, Buffer::Type::Staging, bufferSize,
+                       indices.data());
+  indexBuffer =
+      std::make_shared<Buffer>(context, Buffer::Type::Index, bufferSize);
+  indexBuffer->copy(stagingBuffer, bufferSize);
+}
+
+void RTXModel::createFaceBuffer() {
+  VkDeviceSize bufferSize = sizeof(faces[0]) * nbFaces;
+  Buffer stagingBuffer(context, Buffer::Type::Staging, bufferSize,
+                       faces.data());
+  faceBuffer =
+      std::make_shared<Buffer>(context, Buffer::Type::Face, bufferSize);
+  faceBuffer->copy(stagingBuffer, bufferSize);
 }
