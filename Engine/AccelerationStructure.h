@@ -19,10 +19,10 @@ public:
 
   std::shared_ptr<Buffer> buffer;
 
-private:
-  Context &context;
   VkAccelerationStructureKHR accel;
   VkWriteDescriptorSetAccelerationStructureKHR accelInfo;
+private:
+  Context &context;
 };
 
 #endif // TOXENGINE_ACCELERATIONSTRUCTURE_H_

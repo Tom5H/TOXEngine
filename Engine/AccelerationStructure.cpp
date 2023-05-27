@@ -2,7 +2,6 @@
 
 #include "Buffer.h"
 #include "Context.h"
-#include <vulkan/vulkan_core.h>
 
 AccelerationStructure::AccelerationStructure(
     Context &context, VkAccelerationStructureGeometryKHR geometry,
