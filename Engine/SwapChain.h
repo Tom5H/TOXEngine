@@ -29,6 +29,8 @@ public:
 
   void drawFrame();
   void createDescriptorSets();
+  void createRTDescriptorSet();
+  void copyToBackImage(Image &image);
 
 private:
   VkSurfaceFormatKHR chooseSwapSurfaceFormat(
@@ -47,6 +49,12 @@ private:
   void createCommandBuffers();
   void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
   void createSyncObjects();
+
+  void createRTDescriptorSetLayout();
+  void createRTDescriptorPool();
+  void createRTPipeline();
+  void createRTShaderBindingTable();
+  void raytrace(const VkCommandBuffer &commandBuffer);
 
   Context &context;
   TOXEngine *engine;
@@ -72,6 +80,25 @@ private:
   VkDescriptorPool descriptorPool;
   std::vector<VkDescriptorSet> descriptorSets;
 
+  VkDescriptorPool rtDescriptorPool;
+  VkDescriptorSetLayout rtDescriptorSetLayout;
+  VkDescriptorSet rtDescriptorSet;
+
+  std::shared_ptr<Image> rtOutputImage;
+  VkImageView rtOutputImageView;
+
+  std::vector<VkRayTracingShaderGroupCreateInfoKHR> rtShaderGroups;
+  VkPipelineLayout rtPipelineLayout;
+  VkPipeline rtPipeline;
+
+  std::shared_ptr<Buffer> raygenSBT;
+  std::shared_ptr<Buffer> missSBT;
+  std::shared_ptr<Buffer> hitSBT;
+  VkStridedDeviceAddressRegionKHR raygenRegion{};
+  VkStridedDeviceAddressRegionKHR missRegion{};
+  VkStridedDeviceAddressRegionKHR hitRegion{};
+  VkStridedDeviceAddressRegionKHR callRegion{};
+
   std::vector<VkCommandBuffer> commandBuffers;
 
   std::vector<VkSemaphore> imageAvailableSemaphores;
@@ -79,6 +106,8 @@ private:
   std::vector<VkFence> inFlightFences;
 
   uint32_t currentFrame = 0;
+  uint32_t frame = 0;
+  bool useRaytracer = false;
 };
 
 #endif // TOXENGINE_SWAPCHAIN_H_
