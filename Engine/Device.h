@@ -24,6 +24,11 @@ public:
   void endSingleTimeCommands(VkCommandBuffer commandBuffer);
   VkImageView createImageView(VkImage image, VkFormat format,
                               VkImageAspectFlags aspectFlags);
+  void copyImage(VkImage srcImage, VkImage dstImage, VkExtent2D extent,
+                 VkCommandBuffer commandBuffer);
+  void transitionImageLayout(VkImage image, VkImageLayout oldLayout,
+                             VkImageLayout newLayout,
+                             VkCommandBuffer commandBuffer, bool raytracing = false);
 
 private:
   void create();

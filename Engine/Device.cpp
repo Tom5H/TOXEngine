@@ -36,19 +36,22 @@ void Device::create() {
   deviceFeatures.samplerAnisotropy = VK_TRUE;
 
   VkPhysicalDeviceBufferDeviceAddressFeatures bda_features = {};
-  bda_features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES;
+  bda_features.sType =
+      VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES;
   bda_features.bufferDeviceAddress = VK_TRUE;
 
   VkPhysicalDeviceRayTracingPipelineFeaturesKHR rt_features = {};
-  rt_features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
+  rt_features.sType =
+      VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
   rt_features.rayTracingPipeline = VK_TRUE;
   rt_features.pNext = &bda_features;
 
   VkPhysicalDeviceAccelerationStructureFeaturesKHR as_features = {};
-  as_features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
+  as_features.sType =
+      VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
   as_features.accelerationStructure = VK_TRUE;
   as_features.pNext = &rt_features;
-  
+
   VkDeviceCreateInfo createInfo{};
   createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
   createInfo.pNext = &as_features;
@@ -157,4 +160,102 @@ VkImageView Device::createImageView(VkImage image, VkFormat format,
   }
 
   return imageView;
+}
+
+void Device::copyImage(VkImage srcImage, VkImage dstImage, VkExtent2D extent,
+                       VkCommandBuffer commandBuffer) {
+  VkImageSubresourceLayers srcSubresource{};
+  srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+  srcSubresource.mipLevel = 0;
+  srcSubresource.baseArrayLayer = 0;
+  srcSubresource.layerCount = 1;
+
+  VkImageSubresourceLayers dstSubresource{};
+  dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+  dstSubresource.mipLevel = 0;
+  dstSubresource.baseArrayLayer = 0;
+  dstSubresource.layerCount = 1;
+
+  VkImageCopy imagCopy{};
+  imagCopy.srcSubresource = srcSubresource;
+  imagCopy.dstSubresource = dstSubresource;
+  imagCopy.extent = {extent.width, extent.height, 1};
+
+  vkCmdCopyImage(commandBuffer, srcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                 dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &imagCopy);
+}
+
+void Device::transitionImageLayout(VkImage image, VkImageLayout oldLayout,
+                                   VkImageLayout newLayout,
+                                   VkCommandBuffer commandBuffer,
+                                   bool raytracing) {
+  VkImageMemoryBarrier barrier{};
+  barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+  barrier.oldLayout = oldLayout;
+  barrier.newLayout = newLayout;
+  barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+  barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+  barrier.image = image;
+  barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+  barrier.subresourceRange.baseMipLevel = 0;
+  barrier.subresourceRange.levelCount = 1;
+  barrier.subresourceRange.baseArrayLayer = 0;
+  barrier.subresourceRange.layerCount = 1;
+
+  VkPipelineStageFlags sourceStage;
+  VkPipelineStageFlags destinationStage;
+
+  if (raytracing) {
+    sourceStage = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
+    destinationStage = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
+    if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED &&
+        newLayout == VK_IMAGE_LAYOUT_GENERAL) {
+      barrier.srcAccessMask = 0;
+      barrier.dstAccessMask = 0;
+
+    } else if (oldLayout == VK_IMAGE_LAYOUT_GENERAL &&
+               newLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL) {
+      barrier.srcAccessMask = 0;
+      barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+
+    } else if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED &&
+               newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
+      barrier.srcAccessMask = 0;
+      barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+
+    } else if (oldLayout == VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL &&
+               newLayout == VK_IMAGE_LAYOUT_GENERAL) {
+      barrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
+      barrier.dstAccessMask = 0;
+      
+    } else if (oldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL &&
+               newLayout == VK_IMAGE_LAYOUT_PRESENT_SRC_KHR) {
+      barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+      barrier.dstAccessMask = 0;
+
+    } else {
+      throw std::invalid_argument("unsupported layout transition (rt)!");
+    }
+  } else {
+    if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED &&
+        newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
+      barrier.srcAccessMask = 0;
+      barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+
+      sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+      destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+    } else if (oldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL &&
+               newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
+      barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+      barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+      sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+      destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+    } else {
+      throw std::invalid_argument("unsupported layout transition!");
+    }
+  }
+
+  vkCmdPipelineBarrier(commandBuffer, sourceStage, destinationStage, 0, 0,
+                       nullptr, 0, nullptr, 1, &barrier);
 }
