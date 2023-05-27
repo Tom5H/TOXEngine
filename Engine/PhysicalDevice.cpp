@@ -69,7 +69,9 @@ PhysicalDevice::QueueFamilyIndices PhysicalDevice::findQueueFamilies() {
     vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, i, context->surface,
                                          &presentSupport);
 
-    if (presentSupport) {
+    VkBool32 computeSupport = queueFamily.queueFlags & VK_QUEUE_COMPUTE_BIT;
+    
+    if (presentSupport && computeSupport) {
       indices.presentFamily = i;
     }
 
