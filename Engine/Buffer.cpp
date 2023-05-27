@@ -2,7 +2,9 @@
 
 #include "TOXEngine.h"
 
-Buffer::Buffer(Context &context, Type type, VkDeviceSize size)
+#include <cstring>
+
+Buffer::Buffer(Context &context, Type type, VkDeviceSize size, const void *data)
     : context(context) {
   VkBufferUsageFlags usage;
   VkMemoryPropertyFlags properties;
@@ -28,6 +30,14 @@ Buffer::Buffer(Context &context, Type type, VkDeviceSize size)
   case Type::Index:
     usage =
         VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT |
+        VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR |
+        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT |
+        VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
+    properties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+    break;
+  case Type::Face:
+    usage =
+        VK_BUFFER_USAGE_TRANSFER_DST_BIT |
         VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR |
         VK_BUFFER_USAGE_STORAGE_BUFFER_BIT |
         VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
@@ -100,11 +110,18 @@ Buffer::Buffer(Context &context, Type type, VkDeviceSize size)
     deviceAddress = vkGetBufferDeviceAddress(context.device->get(),
                                              &bufferDeviceAddressInfo);
   }
+
+  if (data) {
+    void *mapped;
+    vkMapMemory(context.device->get(), memory, 0, size, 0, &mapped);
+    memcpy(mapped, data, size);
+    vkUnmapMemory(context.device->get(), memory);
+  }
 }
 
 Buffer::~Buffer() {
-  vkDestroyBuffer(context.device->get(), buffer, nullptr);
-  vkFreeMemory(context.device->get(), memory, nullptr);
+  //vkDestroyBuffer(context.device->get(), buffer, nullptr);
+  //vkFreeMemory(context.device->get(), memory, nullptr);
 }
 
 void Buffer::copy(Buffer other, VkDeviceSize size) {

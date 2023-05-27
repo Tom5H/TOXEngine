@@ -14,13 +14,14 @@ public:
     Staging,
     Vertex,
     Index,
+    Face,
     Uniform,
     AccelInput,
     AccelStorage,
     ShaderBindingTable
   };
 
-  Buffer(Context &context, Type type, VkDeviceSize size);
+  Buffer(Context &context, Type type, VkDeviceSize size, const void *data = nullptr);
   ~Buffer();
 
   VkBuffer get() { return buffer; }
@@ -28,10 +29,11 @@ public:
   VkDeviceAddress getDeviceAddress() { return deviceAddress; }
 
   void copy(Buffer other, VkDeviceSize size);
+  void store(void *data, VkDeviceSize size);
 
 private:
   Context &context;
-  VkBuffer buffer;
+  VkBuffer buffer = VK_NULL_HANDLE;
   VkDeviceMemory memory;
   VkDeviceAddress deviceAddress = 0;
 };
