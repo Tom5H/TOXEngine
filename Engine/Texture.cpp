@@ -18,13 +18,7 @@ Texture::Texture(Context &context, const std::string path) : context(context) {
     throw std::runtime_error("failed to load texture image!");
   }
 
-  Buffer stagingBuffer(context, Buffer::Type::Staging, imageSize);
-
-  void *data;
-  vkMapMemory(context.device->get(), stagingBuffer.getDeviceMemory(), 0,
-              imageSize, 0, &data);
-  memcpy(data, pixels, static_cast<size_t>(imageSize));
-  vkUnmapMemory(context.device->get(), stagingBuffer.getDeviceMemory());
+  Buffer stagingBuffer(context, Buffer::Type::Staging, imageSize, pixels);
 
   stbi_image_free(pixels);
 
