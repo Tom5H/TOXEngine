@@ -107,7 +107,7 @@ private:
 
   uint32_t currentFrame = 0;
   uint32_t frame = 0;
-  bool useRaytracer = false;
+  bool useRaytracer = true;
 };
 
 #endif // TOXENGINE_SWAPCHAIN_H_
