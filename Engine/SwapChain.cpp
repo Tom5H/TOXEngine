@@ -7,10 +7,10 @@
 
 #include <array>
 #include <cstdint>
+#include <cstring>
 #include <memory>
 #include <stdexcept>
 #include <vector>
-#include <cstring>
 
 SwapChain::SwapChain(Context &context, TOXEngine *engine)
     : context(context), engine(engine) {
@@ -450,9 +450,17 @@ VkSurfaceFormatKHR SwapChain::chooseSwapSurfaceFormat(
 
 VkPresentModeKHR SwapChain::chooseSwapPresentMode(
     const std::vector<VkPresentModeKHR> &availablePresentModes) {
-  for (const auto &availablePresentMode : availablePresentModes) {
-    if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
-      return availablePresentMode;
+  if (vsync) {
+    for (const auto &availablePresentMode : availablePresentModes) {
+      if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
+        return availablePresentMode;
+      }
+    }
+  } else {
+    for (const auto &availablePresentMode : availablePresentModes) {
+      if (availablePresentMode == VK_PRESENT_MODE_IMMEDIATE_KHR) {
+        return availablePresentMode;
+      }
     }
   }
 
