@@ -5,6 +5,7 @@
 #include <GLFW/glfw3.h>
 
 #include <cstring>
+#include <memory>
 
 Context::Context() : camera(glm::vec3(0, -1, 5)) {
   initWindow();
@@ -12,7 +13,7 @@ Context::Context() : camera(glm::vec3(0, -1, 5)) {
   setupDebugMessenger();
   createSurface();
   physicalDevice = std::make_shared<PhysicalDevice>(this);
-  device = std::make_shared<Device>(this, physicalDevice);
+  device = std::make_unique<Device>(this, physicalDevice);
 }
 
 Context::~Context() {

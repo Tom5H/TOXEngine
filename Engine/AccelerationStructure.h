@@ -16,13 +16,15 @@ public:
                         VkAccelerationStructureGeometryKHR geometry,
                         uint32_t primitiveCount,
                         VkAccelerationStructureTypeKHR type);
+  ~AccelerationStructure();
 
-  std::shared_ptr<Buffer> buffer;
+  std::unique_ptr<Buffer> buffer;
 
   VkAccelerationStructureKHR accel;
   VkWriteDescriptorSetAccelerationStructureKHR accelInfo;
 private:
   Context &context;
+  std::unique_ptr<Buffer> scratch;
 };
 
 #endif // TOXENGINE_ACCELERATIONSTRUCTURE_H_

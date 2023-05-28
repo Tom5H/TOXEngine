@@ -41,7 +41,7 @@ public:
   VkDebugUtilsMessengerEXT debugMessenger;
   VkSurfaceKHR surface;
   std::shared_ptr<PhysicalDevice> physicalDevice;
-  std::shared_ptr<Device> device;
+  std::unique_ptr<Device> device;
 
   Camera camera;
 

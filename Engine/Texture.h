@@ -17,7 +17,7 @@ public:
   
 private:
   Context &context;
-  std::shared_ptr<Image> image;
+  std::unique_ptr<Image> image;
   VkImageView imageView;
 };
 

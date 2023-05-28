@@ -120,8 +120,8 @@ Buffer::Buffer(Context &context, Type type, VkDeviceSize size, const void *data)
 }
 
 Buffer::~Buffer() {
-  //vkDestroyBuffer(context.device->get(), buffer, nullptr);
-  //vkFreeMemory(context.device->get(), memory, nullptr);
+  vkDestroyBuffer(context.device->get(), buffer, nullptr);
+  vkFreeMemory(context.device->get(), memory, nullptr);
 }
 
 void Buffer::copy(Buffer other, VkDeviceSize size) {

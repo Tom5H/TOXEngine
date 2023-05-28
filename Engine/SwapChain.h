@@ -75,11 +75,11 @@ private:
   VkPipelineLayout pipelineLayout;
   VkPipeline graphicsPipeline;
 
-  std::shared_ptr<Image> depthImage;
+  std::unique_ptr<Image> depthImage;
   VkDeviceMemory depthImageMemory;
   VkImageView depthImageView;
 
-  std::vector<std::shared_ptr<Buffer>> uniformBuffers;
+  std::vector<std::unique_ptr<Buffer>> uniformBuffers;
   std::vector<void *> uniformBuffersMapped;
 
   VkDescriptorPool descriptorPool;
@@ -91,7 +91,7 @@ private:
   VkDescriptorSetLayout rtDescriptorSetLayout;
   VkDescriptorSet rtDescriptorSet;
 
-  std::shared_ptr<Image> rtOutputImage;
+  std::unique_ptr<Image> rtOutputImage;
   VkImageView rtOutputImageView;
 
   std::unique_ptr<Buffer> rtUniformBuffer;
@@ -101,9 +101,9 @@ private:
   VkPipelineLayout rtPipelineLayout;
   VkPipeline rtPipeline;
 
-  std::shared_ptr<Buffer> raygenSBT;
-  std::shared_ptr<Buffer> missSBT;
-  std::shared_ptr<Buffer> hitSBT;
+  std::unique_ptr<Buffer> raygenSBT;
+  std::unique_ptr<Buffer> missSBT;
+  std::unique_ptr<Buffer> hitSBT;
   VkStridedDeviceAddressRegionKHR raygenRegion{};
   VkStridedDeviceAddressRegionKHR missRegion{};
   VkStridedDeviceAddressRegionKHR hitRegion{};

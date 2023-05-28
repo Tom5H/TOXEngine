@@ -22,7 +22,7 @@ Texture::Texture(Context &context, const std::string path) : context(context) {
 
   stbi_image_free(pixels);
 
-  image = std::make_shared<Image>(context, texWidth, texHeight,
+  image = std::make_unique<Image>(context, texWidth, texHeight,
                                   Image::Type::Texture);
   image->transitionLayout(VK_IMAGE_LAYOUT_UNDEFINED,
                           VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);

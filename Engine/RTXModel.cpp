@@ -34,7 +34,7 @@ RTXModel::RTXModel(Context &context, const std::string path)
   asGeom.flags = VK_GEOMETRY_OPAQUE_BIT_KHR;
   asGeom.geometry.triangles = triangles;
 
-  BLAS = std::make_shared<AccelerationStructure>(
+  BLAS = std::make_unique<AccelerationStructure>(
       context, asGeom, primitiveCount,
       VK_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL_KHR);
 
@@ -58,7 +58,7 @@ RTXModel::RTXModel(Context &context, const std::string path)
   asInstance.mask = 0xFF;
   asInstance.instanceShaderBindingTableRecordOffset = 0; // (hit group)
 
-  instancesBuffer = std::make_shared<Buffer>(
+  instancesBuffer = std::make_unique<Buffer>(
       context, Buffer::Type::AccelInput,
       sizeof(VkAccelerationStructureInstanceKHR), &asInstance);
 
@@ -75,7 +75,7 @@ RTXModel::RTXModel(Context &context, const std::string path)
   instanceGeometry.geometry.instances = instancesData;
   instanceGeometry.flags = VK_GEOMETRY_OPAQUE_BIT_KHR;
 
-  TLAS = std::make_shared<AccelerationStructure>(
+  TLAS = std::make_unique<AccelerationStructure>(
       context, instanceGeometry, 1,
       VK_ACCELERATION_STRUCTURE_TYPE_TOP_LEVEL_KHR);
 }
@@ -126,7 +126,7 @@ void RTXModel::createVertexBuffer() {
   Buffer stagingBuffer(context, Buffer::Type::Staging, bufferSize,
                        vertices.data());
   vertexBuffer =
-      std::make_shared<Buffer>(context, Buffer::Type::Vertex, bufferSize);
+      std::make_unique<Buffer>(context, Buffer::Type::Vertex, bufferSize);
   vertexBuffer->copy(stagingBuffer, bufferSize);
 }
 
@@ -135,7 +135,7 @@ void RTXModel::createIndexBuffer() {
   Buffer stagingBuffer(context, Buffer::Type::Staging, bufferSize,
                        indices.data());
   indexBuffer =
-      std::make_shared<Buffer>(context, Buffer::Type::Index, bufferSize);
+      std::make_unique<Buffer>(context, Buffer::Type::Index, bufferSize);
   indexBuffer->copy(stagingBuffer, bufferSize);
 }
 
@@ -144,6 +144,6 @@ void RTXModel::createFaceBuffer() {
   Buffer stagingBuffer(context, Buffer::Type::Staging, bufferSize,
                        faces.data());
   faceBuffer =
-      std::make_shared<Buffer>(context, Buffer::Type::Face, bufferSize);
+      std::make_unique<Buffer>(context, Buffer::Type::Face, bufferSize);
   faceBuffer->copy(stagingBuffer, bufferSize);
 }

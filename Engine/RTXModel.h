@@ -23,16 +23,16 @@ public:
   uint32_t getFaceCount() const { return nbFaces; }
 
   std::vector<uint32_t> indices;
-  std::shared_ptr<Buffer> indexBuffer;
+  std::unique_ptr<Buffer> indexBuffer;
   
   std::vector<Vertex> vertices;
-  std::shared_ptr<Buffer> vertexBuffer;
+  std::unique_ptr<Buffer> vertexBuffer;
 
   std::vector<Face> faces;
-  std::shared_ptr<Buffer> faceBuffer;
+  std::unique_ptr<Buffer> faceBuffer;
 
-  std::shared_ptr<AccelerationStructure> BLAS;
-  std::shared_ptr<AccelerationStructure> TLAS;
+  std::unique_ptr<AccelerationStructure> BLAS;
+  std::unique_ptr<AccelerationStructure> TLAS;
 
 private:
   void createVertexBuffer();

@@ -3,6 +3,7 @@
 #include "TOXEngine.h"
 #include "Vertex.h"
 
+#include <memory>
 #include <tiny_obj_loader.h>
 
 #include <cstring>
@@ -56,7 +57,7 @@ void Model::createVertexBuffer() {
                        vertices.data());
 
   vertexBuffer =
-      std::make_shared<Buffer>(context, Buffer::Type::Vertex, bufferSize);
+      std::make_unique<Buffer>(context, Buffer::Type::Vertex, bufferSize);
 
   vertexBuffer->copy(stagingBuffer, bufferSize);
 }
@@ -68,7 +69,7 @@ void Model::createIndexBuffer() {
                        indices.data());
 
   indexBuffer =
-      std::make_shared<Buffer>(context, Buffer::Type::Index, bufferSize);
+      std::make_unique<Buffer>(context, Buffer::Type::Index, bufferSize);
 
   indexBuffer->copy(stagingBuffer, bufferSize);
 }

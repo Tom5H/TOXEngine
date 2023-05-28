@@ -25,8 +25,8 @@ private:
 
   std::vector<uint32_t> indices;
   std::vector<Vertex> vertices;
-  std::shared_ptr<Buffer> vertexBuffer;
-  std::shared_ptr<Buffer> indexBuffer;
+  std::unique_ptr<Buffer> vertexBuffer;
+  std::unique_ptr<Buffer> indexBuffer;
 
   void createVertexBuffer();
   void createIndexBuffer();

@@ -2,6 +2,7 @@
 
 #include "Buffer.h"
 #include "Context.h"
+#include <memory>
 
 AccelerationStructure::AccelerationStructure(
     Context &context, VkAccelerationStructureGeometryKHR geometry,
@@ -18,12 +19,13 @@ AccelerationStructure::AccelerationStructure(
   buildGeometryInfo.pGeometries = &geometry;
 
   VkAccelerationStructureBuildSizesInfoKHR buildSizesInfo;
-  buildSizesInfo.sType = VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR;
+  buildSizesInfo.sType =
+      VK_STRUCTURE_TYPE_ACCELERATION_STRUCTURE_BUILD_SIZES_INFO_KHR;
   vkGetAccelerationStructureBuildSizesKHR(
       context.device->get(), VK_ACCELERATION_STRUCTURE_BUILD_TYPE_DEVICE_KHR,
       &buildGeometryInfo, &primitiveCount, &buildSizesInfo);
 
-  buffer = std::make_shared<Buffer>(context, Buffer::Type::AccelStorage,
+  buffer = std::make_unique<Buffer>(context, Buffer::Type::AccelStorage,
                                     buildSizesInfo.accelerationStructureSize);
 
   VkAccelerationStructureCreateInfoKHR asCreateInfo{};
@@ -35,10 +37,10 @@ AccelerationStructure::AccelerationStructure(
   vkCreateAccelerationStructureKHR(context.device->get(), &asCreateInfo,
                                    nullptr, &accel);
 
-  Buffer scratch(context, Buffer::Type::Scratch,
-                 buildSizesInfo.buildScratchSize);
+  scratch = std::make_unique<Buffer>(context, Buffer::Type::Scratch,
+                                     buildSizesInfo.buildScratchSize);
 
-  buildGeometryInfo.scratchData.deviceAddress = scratch.getDeviceAddress();
+  buildGeometryInfo.scratchData.deviceAddress = scratch->getDeviceAddress();
   buildGeometryInfo.dstAccelerationStructure = accel;
 
   VkAccelerationStructureBuildRangeInfoKHR offset{};
@@ -48,7 +50,7 @@ AccelerationStructure::AccelerationStructure(
   offset.transformOffset = 0;
 
   VkAccelerationStructureBuildRangeInfoKHR *p_offset = &offset;
-  
+
   VkCommandBuffer commandBuffer = context.device->beginSingleTimeCommands();
 
   vkCmdBuildAccelerationStructuresKHR(commandBuffer, 1, &buildGeometryInfo,
@@ -56,7 +58,12 @@ AccelerationStructure::AccelerationStructure(
 
   context.device->endSingleTimeCommands(commandBuffer);
 
-  accelInfo.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR;
+  accelInfo.sType =
+      VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET_ACCELERATION_STRUCTURE_KHR;
   accelInfo.accelerationStructureCount = 1;
   accelInfo.pAccelerationStructures = &accel;
+}
+
+AccelerationStructure::~AccelerationStructure() {
+  vkDestroyAccelerationStructureKHR(context.device->get(), accel, nullptr);
 }

@@ -47,13 +47,13 @@ public:
   App app;
   Context context;
 
-  std::shared_ptr<SwapChain> swapChain;
+  std::unique_ptr<SwapChain> swapChain;
 
   // todo these should be vectors
-  std::shared_ptr<Sampler> sampler;
-  std::shared_ptr<Texture> texture;
-  std::shared_ptr<Model> model;
-  std::shared_ptr<RTXModel> rtx_model;
+  std::unique_ptr<Sampler> sampler;
+  std::unique_ptr<Texture> texture;
+  std::unique_ptr<Model> model;
+  std::unique_ptr<RTXModel> rtx_model;
 
   float deltaTime;
 

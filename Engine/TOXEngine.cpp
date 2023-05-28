@@ -1,4 +1,5 @@
 #include "TOXEngine.h"
+#include <memory>
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -9,13 +10,13 @@ void TOXEngine::run() {
 }
 
 void TOXEngine::initVulkan() {
-  swapChain = std::make_shared<SwapChain>(context, this);
-  sampler = std::make_shared<Sampler>(context);
-  texture = std::make_shared<Texture>(context, TEXTURE_PATH);
+  swapChain = std::make_unique<SwapChain>(context, this);
+  sampler = std::make_unique<Sampler>(context);
+  texture = std::make_unique<Texture>(context, TEXTURE_PATH);
   // TODO interface function to load models for application (in startup first)
   // TODO factory selecting Model or RTXModel
-  model = std::make_shared<Model>(context, MODEL_PATH);
-  rtx_model = std::make_shared<RTXModel>(context, RTX_MODEL_PATH);
+  model = std::make_unique<Model>(context, MODEL_PATH);
+  rtx_model = std::make_unique<RTXModel>(context, RTX_MODEL_PATH);
   swapChain->createDescriptorSets();
   swapChain->createRTDescriptorSet();
 }
@@ -25,6 +26,8 @@ void TOXEngine::mainLoop() {
     float currentFrame = static_cast<float>(glfwGetTime());
     deltaTime = currentFrame - lastFrame;
     lastFrame = currentFrame;
+
+    //std::cout << "fps: " << 1 / deltaTime << std::endl;
 
     glfwPollEvents();
     processInputs();

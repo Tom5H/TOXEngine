@@ -39,6 +39,10 @@ SwapChain::~SwapChain() {
   vkDestroyPipeline(context.device->get(), rtPipeline, nullptr);
   vkDestroyPipelineLayout(context.device->get(), rtPipelineLayout, nullptr);
 
+  vkDestroyDescriptorPool(context.device->get(), rtDescriptorPool, nullptr);
+
+  vkDestroyDescriptorSetLayout(context.device->get(), rtDescriptorSetLayout, nullptr);
+
   vkDestroyPipeline(context.device->get(), graphicsPipeline, nullptr);
   vkDestroyPipelineLayout(context.device->get(), pipelineLayout, nullptr);
   vkDestroyRenderPass(context.device->get(), renderPass, nullptr);
@@ -119,6 +123,8 @@ void SwapChain::create() {
 }
 
 void SwapChain::cleanup() {
+  vkDestroyImageView(context.device->get(), rtOutputImageView, nullptr);
+  
   vkDestroyImageView(context.device->get(), depthImageView, nullptr);
   vkFreeMemory(context.device->get(), depthImageMemory, nullptr);
 
@@ -389,7 +395,7 @@ void SwapChain::createGraphicsPipeline() {
 
 void SwapChain::createDepthResources() {
   depthImage =
-      std::make_shared<Image>(context, swapChainExtent.width,
+      std::make_unique<Image>(context, swapChainExtent.width,
                               swapChainExtent.height, Image::Type::Depth);
   depthImageView = context.device->createImageView(
       depthImage->get(), depthImage->getFormat(), VK_IMAGE_ASPECT_DEPTH_BIT);
@@ -498,7 +504,7 @@ void SwapChain::createUniformBuffers() {
 
   for (size_t i = 0; i < context.MAX_FRAMES_IN_FLIGHT; i++) {
     uniformBuffers[i] =
-        std::make_shared<Buffer>(context, Buffer::Type::Uniform, bufferSize);
+        std::make_unique<Buffer>(context, Buffer::Type::Uniform, bufferSize);
 
     vkMapMemory(context.device->get(), uniformBuffers[i]->getDeviceMemory(), 0,
                 bufferSize, 0, &uniformBuffersMapped[i]);
@@ -854,7 +860,7 @@ void SwapChain::createRTDescriptorPool() {
 }
 
 void SwapChain::createRTDescriptorSet() {
-  rtOutputImage = std::make_shared<Image>(context, swapChainExtent.width,
+  rtOutputImage = std::make_unique<Image>(context, swapChainExtent.width,
                                           swapChainExtent.height,
                                           Image::Type::RTOutputImage);
   rtOutputImage->transitionLayout(VK_IMAGE_LAYOUT_UNDEFINED,
@@ -1051,12 +1057,12 @@ void SwapChain::createRTShaderBindingTable() {
   }
 
   raygenSBT =
-      std::make_shared<Buffer>(context, Buffer::Type::ShaderBindingTable,
+      std::make_unique<Buffer>(context, Buffer::Type::ShaderBindingTable,
                                handleSize, handleStorage.data());
-  missSBT = std::make_shared<Buffer>(context, Buffer::Type::ShaderBindingTable,
+  missSBT = std::make_unique<Buffer>(context, Buffer::Type::ShaderBindingTable,
                                      handleSize,
                                      handleStorage.data() + handleSizeAligned);
-  hitSBT = std::make_shared<Buffer>(
+  hitSBT = std::make_unique<Buffer>(
       context, Buffer::Type::ShaderBindingTable, handleSize,
       handleStorage.data() + 2 * handleSizeAligned);
 
