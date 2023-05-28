@@ -7,6 +7,11 @@
 layout(binding = 0, set = 0) uniform accelerationStructureEXT topLevelAS;
 layout(binding = 1, set = 0, rgba32f) uniform image2D outputImage;
 
+layout(binding = 5, set = 0) uniform Camera {
+  mat4 view;
+  mat4 proj;
+} camera;
+
 layout(push_constant) uniform PushConstants {
     int frame;
 } pushConstants;
@@ -63,17 +68,17 @@ void main()
 
         for(uint depth = 0; depth < 8; depth++){
             traceRayEXT(
-                topLevelAS,
-                gl_RayFlagsOpaqueEXT,
-                0xff, // cullMask
-                0,    // sbtRecordOffset
-                0,    // sbtRecordStride
-                0,    // missIndex
-                origin.xyz,
-                0.001,
-                direction.xyz,
-                10000.0,
-                0     // payloadLocation
+                topLevelAS,           // acceleration structure
+                gl_RayFlagsOpaqueEXT, // rayFlags
+                0xff,                 // cullMask
+                0,                    // sbtRecordOffset
+                0,                    // sbtRecordStride
+                0,                    // missIndex
+                origin.xyz,           // ray origin
+                0.001,                // ray min range
+                direction.xyz,        // ray direction
+                10000.0,              // ray max range
+                0                     // payload (location = 0)
             );
             color += weight * payload.emission;
             origin.xyz = payload.position;
@@ -87,31 +92,8 @@ void main()
     }
     color /= maxSamples;
     
-    vec4 oldColor = imageLoad(outputImage, ivec2(gl_LaunchIDEXT.xy));
+    //vec4 oldColor = imageLoad(outputImage, ivec2(gl_LaunchIDEXT.xy));
     vec4 newColor = vec4(color, 1.0);
-    newColor = (newColor + (oldColor * pushConstants.frame)) / (pushConstants.frame + 1);
+    //newColor = (newColor + (oldColor * pushConstants.frame)) / (pushConstants.frame + 1);
     imageStore(outputImage, ivec2(gl_LaunchIDEXT.xy), newColor);
 }
-
-/*  vec4 target = vec4(d.x, d.y, 100, 0);
-  vec4 direction = vec4(normalize(target.xyz), 0);
-
-  uint  rayFlags = gl_RayFlagsOpaqueEXT;
-  float tMin     = 0.001;
-  float tMax     = 10000.0;
-
-  traceRayEXT(topLevelAS,     // acceleration structure
-              rayFlags,       // rayFlags
-              0xFF,           // cullMask
-              0,              // sbtRecordOffset
-              0,              // sbtRecordStride
-              0,              // missIndex
-              origin.xyz,     // ray origin
-              tMin,           // ray min range
-              direction.xyz,  // ray direction
-              tMax,           // ray max range
-              0               // payload (location = 0)
-  );
-
-  imageStore(image, ivec2(gl_LaunchIDEXT.xy), vec4(prd.hitValue, 1.0));
-}*/

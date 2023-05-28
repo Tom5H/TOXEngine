@@ -1,6 +1,7 @@
 #ifndef TOXENGINE_CONTEXT_H_
 #define TOXENGINE_CONTEXT_H_
 
+#include "Camera.h"
 #include "Device.h"
 #include "PhysicalDevice.h"
 
@@ -42,6 +43,8 @@ public:
   std::shared_ptr<PhysicalDevice> physicalDevice;
   std::shared_ptr<Device> device;
 
+  Camera camera;
+
 private:
   void initWindow();
 
@@ -50,6 +53,25 @@ private:
     auto context =
         reinterpret_cast<Context *>(glfwGetWindowUserPointer(window));
     context->framebufferResized = true;
+  }
+
+  static void mouse_callback(GLFWwindow *window, double xpos, double ypos) {
+    auto context =
+        reinterpret_cast<Context *>(glfwGetWindowUserPointer(window));
+    context->camera.ProcessMouseMovement(xpos, ypos);
+  }
+
+  static void scroll_callback(GLFWwindow *window, double xoffset,
+                              double yoffset) {
+    auto context =
+        reinterpret_cast<Context *>(glfwGetWindowUserPointer(window));
+    context->camera.ProcessMouseScroll(yoffset);
+  }
+
+  static void mouse_button_callback(GLFWwindow *window, int button, int action,
+                                    int mods) {
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+      glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
   }
 
   void createInstance();

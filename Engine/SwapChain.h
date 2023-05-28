@@ -32,6 +32,8 @@ public:
   void createRTDescriptorSet();
   void copyToBackImage(Image &image);
 
+  bool useRaytracer = true;
+
 private:
   VkSurfaceFormatKHR chooseSwapSurfaceFormat(
       const std::vector<VkSurfaceFormatKHR> &availableFormats);
@@ -51,6 +53,7 @@ private:
   void createSyncObjects();
 
   void createRTDescriptorSetLayout();
+  void createRTUniformBuffer();
   void createRTDescriptorPool();
   void createRTPipeline();
   void createRTShaderBindingTable();
@@ -64,6 +67,8 @@ private:
   VkExtent2D swapChainExtent;
   std::vector<VkImageView> swapChainImageViews;
   std::vector<VkFramebuffer> swapChainFramebuffers;
+
+  // rasterizer
 
   VkRenderPass renderPass;
   VkDescriptorSetLayout descriptorSetLayout;
@@ -80,12 +85,17 @@ private:
   VkDescriptorPool descriptorPool;
   std::vector<VkDescriptorSet> descriptorSets;
 
+  // raytracer
+
   VkDescriptorPool rtDescriptorPool;
   VkDescriptorSetLayout rtDescriptorSetLayout;
   VkDescriptorSet rtDescriptorSet;
 
   std::shared_ptr<Image> rtOutputImage;
   VkImageView rtOutputImageView;
+
+  std::unique_ptr<Buffer> rtUniformBuffer;
+  void *rtUniformBufferMapped;
 
   std::vector<VkRayTracingShaderGroupCreateInfoKHR> rtShaderGroups;
   VkPipelineLayout rtPipelineLayout;
@@ -99,6 +109,8 @@ private:
   VkStridedDeviceAddressRegionKHR hitRegion{};
   VkStridedDeviceAddressRegionKHR callRegion{};
 
+  // general
+
   std::vector<VkCommandBuffer> commandBuffers;
 
   std::vector<VkSemaphore> imageAvailableSemaphores;
@@ -107,7 +119,6 @@ private:
 
   uint32_t currentFrame = 0;
   uint32_t frame = 0;
-  bool useRaytracer = true;
 };
 
 #endif // TOXENGINE_SWAPCHAIN_H_

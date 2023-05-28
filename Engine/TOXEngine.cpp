@@ -22,9 +22,41 @@ void TOXEngine::initVulkan() {
 
 void TOXEngine::mainLoop() {
   while (!glfwWindowShouldClose(context.window)) {
+    float currentFrame = static_cast<float>(glfwGetTime());
+    deltaTime = currentFrame - lastFrame;
+    lastFrame = currentFrame;
+
     glfwPollEvents();
+    processInputs();
     swapChain->drawFrame();
   }
 
   context.device->waitIdle();
+}
+
+void TOXEngine::processInputs() {
+  static bool r = true;
+  if (glfwGetKey(context.window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+    glfwSetInputMode(context.window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+  if (glfwGetKey(context.window, GLFW_KEY_W) == GLFW_PRESS)
+    context.camera.ProcessKeyboard(Camera::Direction::Forward, deltaTime);
+  if (glfwGetKey(context.window, GLFW_KEY_S) == GLFW_PRESS)
+    context.camera.ProcessKeyboard(Camera::Direction::Backward, deltaTime);
+  if (glfwGetKey(context.window, GLFW_KEY_A) == GLFW_PRESS)
+    context.camera.ProcessKeyboard(Camera::Direction::Left, deltaTime);
+  if (glfwGetKey(context.window, GLFW_KEY_D) == GLFW_PRESS)
+    context.camera.ProcessKeyboard(Camera::Direction::Right, deltaTime);
+  if (glfwGetKey(context.window, GLFW_KEY_Q) == GLFW_PRESS)
+    context.camera.ProcessKeyboard(Camera::Direction::Up, deltaTime);
+  if (glfwGetKey(context.window, GLFW_KEY_E) == GLFW_PRESS)
+    context.camera.ProcessKeyboard(Camera::Direction::Down, deltaTime);
+
+  if (glfwGetKey(context.window, GLFW_KEY_R) == GLFW_PRESS) {
+    if (r) {
+      r = false;
+      swapChain->useRaytracer = !swapChain->useRaytracer;
+    }
+  } else {
+    r = true;
+  }
 }

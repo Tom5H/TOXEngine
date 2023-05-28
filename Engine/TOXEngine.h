@@ -23,10 +23,16 @@ const uint32_t HEIGHT = 1024;
 const std::string MODEL_PATH = "../resources/models/viking_room.obj";
 const std::string TEXTURE_PATH = "../resources/textures/viking_room.png";
 
-const std::string RTX_MODEL_PATH = "../resources/models/CornellBox-Original.obj";
+const std::string RTX_MODEL_PATH =
+    "../resources/models/CornellBox-Original.obj";
 
 struct UniformBufferObject {
   alignas(16) glm::mat4 model;
+  alignas(16) glm::mat4 view;
+  alignas(16) glm::mat4 proj;
+};
+
+struct RTUniformBufferObject {
   alignas(16) glm::mat4 view;
   alignas(16) glm::mat4 proj;
 };
@@ -48,10 +54,15 @@ public:
   std::shared_ptr<Texture> texture;
   std::shared_ptr<Model> model;
   std::shared_ptr<RTXModel> rtx_model;
-  
+
+  float deltaTime;
+
 private:
   void initVulkan();
   void mainLoop();
-  };
+  void processInputs();
+
+  float lastFrame;
+};
 
 #endif // TOXENGINE_H_

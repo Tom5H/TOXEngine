@@ -2,6 +2,7 @@
 
 #include "TOXEngine.h"
 
+#include <GLFW/glfw3.h>
 #include <cstring>
 
 Context::Context() {
@@ -34,6 +35,10 @@ void Context::initWindow() {
   window = glfwCreateWindow(WIDTH, HEIGHT, "Vulkan", nullptr, nullptr);
   glfwSetWindowUserPointer(window, this);
   glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
+  glfwSetCursorPosCallback(window, mouse_callback);
+  glfwSetScrollCallback(window, scroll_callback);
+  glfwSetMouseButtonCallback(window, mouse_button_callback);
+  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 }
 
 void Context::createInstance() {

@@ -4,11 +4,13 @@
 #include "Image.h"
 #include "Shader.h"
 #include "TOXEngine.h"
+
 #include <array>
 #include <cstdint>
 #include <memory>
 #include <stdexcept>
 #include <vector>
+#include <cstring>
 
 SwapChain::SwapChain(Context &context, TOXEngine *engine)
     : context(context), engine(engine) {
@@ -25,6 +27,7 @@ SwapChain::SwapChain(Context &context, TOXEngine *engine)
   createDescriptorPool();
 
   createRTDescriptorSetLayout();
+  createRTUniformBuffer();
   createRTDescriptorPool();
   createRTPipeline();
   createRTShaderBindingTable();
@@ -126,8 +129,6 @@ void SwapChain::cleanup() {
   for (auto imageView : swapChainImageViews) {
     vkDestroyImageView(context.device->get(), imageView, nullptr);
   }
-
-  vkDestroyImageView(context.device->get(), rtOutputImageView, nullptr);
 
   vkDestroySwapchainKHR(context.device->get(), swapChain, nullptr);
 }
@@ -665,6 +666,12 @@ void SwapChain::drawFrame() {
     throw std::runtime_error("failed to acquire swap chain image!");
   }
 
+  RTUniformBufferObject rtUbo;
+  rtUbo.view = context.camera.GetViewMatrix();
+  rtUbo.proj = context.camera.GetProjectionMatrix(static_cast<float>(width()),
+                                                  static_cast<float>(height()));
+  memcpy(rtUniformBufferMapped, &rtUbo, sizeof(rtUbo));
+
   engine->app.update(uniformBuffersMapped[currentFrame], width(), height());
 
   vkResetFences(context.device->get(), 1, &inFlightFences[currentFrame]);
@@ -788,9 +795,17 @@ void SwapChain::createRTDescriptorSetLayout() {
   faceBinding.pImmutableSamplers = nullptr;
   faceBinding.stageFlags = VK_SHADER_STAGE_CLOSEST_HIT_BIT_KHR;
 
-  std::array<VkDescriptorSetLayoutBinding, 5> bindings = {
-      asLayoutBinding, storageImageLayoutBinding, vertexBinding, indexBinding,
-      faceBinding};
+  VkDescriptorSetLayoutBinding uniformBinding{};
+  uniformBinding.binding = 5;
+  uniformBinding.descriptorCount = 1;
+  uniformBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+  uniformBinding.pImmutableSamplers = nullptr;
+  uniformBinding.stageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR;
+
+  std::array<VkDescriptorSetLayoutBinding, 6> bindings = {
+      asLayoutBinding, storageImageLayoutBinding,
+      vertexBinding,   indexBinding,
+      faceBinding,     uniformBinding};
 
   VkDescriptorSetLayoutCreateInfo layoutInfo{};
   layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
@@ -804,7 +819,7 @@ void SwapChain::createRTDescriptorSetLayout() {
 }
 
 void SwapChain::createRTDescriptorPool() {
-  std::array<VkDescriptorPoolSize, 5> poolSizes{};
+  std::array<VkDescriptorPoolSize, 6> poolSizes{};
   poolSizes[0].type = VK_DESCRIPTOR_TYPE_ACCELERATION_STRUCTURE_KHR;
   poolSizes[0].descriptorCount = 1; // maybe MAX_FRAMES_IN_FLIGHT
   poolSizes[1].type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
@@ -815,6 +830,8 @@ void SwapChain::createRTDescriptorPool() {
   poolSizes[3].descriptorCount = 1;
   poolSizes[4].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
   poolSizes[4].descriptorCount = 1;
+  poolSizes[5].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+  poolSizes[5].descriptorCount = 1;
 
   VkDescriptorPoolCreateInfo poolInfo{};
   poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
@@ -871,7 +888,11 @@ void SwapChain::createRTDescriptorSet() {
   faceBufferInfo.buffer = engine->rtx_model->faceBuffer->get();
   faceBufferInfo.range = VK_WHOLE_SIZE;
 
-  std::array<VkWriteDescriptorSet, 5> descriptorWrites{};
+  VkDescriptorBufferInfo uniformBufferInfo{};
+  uniformBufferInfo.buffer = rtUniformBuffer->get();
+  uniformBufferInfo.range = sizeof(RTUniformBufferObject);
+
+  std::array<VkWriteDescriptorSet, 6> descriptorWrites{};
 
   descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
   descriptorWrites[0].dstSet = rtDescriptorSet;
@@ -913,6 +934,14 @@ void SwapChain::createRTDescriptorSet() {
   descriptorWrites[4].descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
   descriptorWrites[4].descriptorCount = 1;
   descriptorWrites[4].pBufferInfo = &faceBufferInfo;
+
+  descriptorWrites[5].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+  descriptorWrites[5].dstSet = rtDescriptorSet;
+  descriptorWrites[5].dstBinding = 5;
+  descriptorWrites[5].dstArrayElement = 0;
+  descriptorWrites[5].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+  descriptorWrites[5].descriptorCount = 1;
+  descriptorWrites[5].pBufferInfo = &uniformBufferInfo;
 
   vkUpdateDescriptorSets(context.device->get(),
                          static_cast<uint32_t>(descriptorWrites.size()),
@@ -964,7 +993,7 @@ void SwapChain::createRTPipeline() {
   VkPushConstantRange pushRange{};
   pushRange.size = sizeof(int);
   pushRange.stageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR;
-  
+
   VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo{};
   pipelineLayoutCreateInfo.sType =
       VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
@@ -1050,7 +1079,8 @@ void SwapChain::raytrace(const VkCommandBuffer &commandBuffer) {
                     rtPipeline);
   vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_RAY_TRACING_KHR,
                           rtPipelineLayout, 0, 1, &rtDescriptorSet, 0, nullptr);
-  vkCmdPushConstants(commandBuffer, rtPipelineLayout, VK_SHADER_STAGE_RAYGEN_BIT_KHR, 0, sizeof(int), &frame);
+  vkCmdPushConstants(commandBuffer, rtPipelineLayout,
+                     VK_SHADER_STAGE_RAYGEN_BIT_KHR, 0, sizeof(int), &frame);
   vkCmdTraceRaysKHR(commandBuffer, &raygenRegion, &missRegion, &hitRegion,
                     &callRegion, swapChainExtent.width, swapChainExtent.height,
                     2);
@@ -1061,4 +1091,14 @@ void SwapChain::raytrace(const VkCommandBuffer &commandBuffer) {
   }
   context.device->waitIdle();
   frame++;
+}
+
+void SwapChain::createRTUniformBuffer() {
+  VkDeviceSize bufferSize = sizeof(RTUniformBufferObject);
+
+  rtUniformBuffer =
+      std::make_unique<Buffer>(context, Buffer::Type::Uniform, bufferSize);
+
+  vkMapMemory(context.device->get(), rtUniformBuffer->getDeviceMemory(), 0,
+              bufferSize, 0, &rtUniformBufferMapped);
 }
