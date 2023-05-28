@@ -9,8 +9,8 @@ public:
   enum class Direction { Forward, Backward, Left, Right, Up, Down };
 
   Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f),
-         glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f))
-      : position(position), front(glm::vec3(0.0f, 0.0f, -1.0f)), up(up) {
+         glm::vec3 worldUp = glm::vec3(0.0f, 1.0f, 0.0f))
+      : position(position), front(glm::vec3(0.0f, 0.0f, -1.0f)), worldUp(worldUp) {
     updateCameraVectors();
   }
 
@@ -53,7 +53,7 @@ public:
     xoffset *= mouseSensitivity;
     yoffset *= mouseSensitivity;
     yaw += xoffset;
-    pitch += yoffset;
+    pitch -= yoffset;
     if (constrainPitch) {
       if (pitch > 89.0f)
         pitch = 89.0f;
