@@ -3,9 +3,10 @@
 #include "TOXEngine.h"
 
 #include <GLFW/glfw3.h>
+
 #include <cstring>
 
-Context::Context() {
+Context::Context() : camera(glm::vec3(0, -1, 5)) {
   initWindow();
   createInstance();
   setupDebugMessenger();
@@ -167,9 +168,9 @@ VkResult Context::CreateDebugUtilsMessengerEXT(
   }
 }
 
-void Context::DestroyDebugUtilsMessengerEXT(VkInstance instance,
-                                   VkDebugUtilsMessengerEXT debugMessenger,
-                                   const VkAllocationCallbacks *pAllocator) {
+void Context::DestroyDebugUtilsMessengerEXT(
+    VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger,
+    const VkAllocationCallbacks *pAllocator) {
   auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(
       instance, "vkDestroyDebugUtilsMessengerEXT");
   if (func != nullptr) {
