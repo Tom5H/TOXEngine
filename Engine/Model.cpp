@@ -60,6 +60,7 @@ void Model::createVertexBuffer() {
       std::make_unique<Buffer>(context, Buffer::Type::Vertex, bufferSize);
 
   vertexBuffer->copy(stagingBuffer, bufferSize);
+  stagingBuffer.cleanup();
 }
 
 void Model::createIndexBuffer() {
@@ -72,4 +73,5 @@ void Model::createIndexBuffer() {
       std::make_unique<Buffer>(context, Buffer::Type::Index, bufferSize);
 
   indexBuffer->copy(stagingBuffer, bufferSize);
+  stagingBuffer.cleanup();
 }

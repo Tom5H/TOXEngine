@@ -1,6 +1,7 @@
 #include "RTXModel.h"
 
 #include "AccelerationStructure.h"
+#include "Buffer.h"
 
 #include <tiny_obj_loader.h>
 #include <vulkan/vulkan.h>
@@ -128,6 +129,7 @@ void RTXModel::createVertexBuffer() {
   vertexBuffer =
       std::make_unique<Buffer>(context, Buffer::Type::Vertex, bufferSize);
   vertexBuffer->copy(stagingBuffer, bufferSize);
+  stagingBuffer.cleanup();
 }
 
 void RTXModel::createIndexBuffer() {
@@ -137,6 +139,7 @@ void RTXModel::createIndexBuffer() {
   indexBuffer =
       std::make_unique<Buffer>(context, Buffer::Type::Index, bufferSize);
   indexBuffer->copy(stagingBuffer, bufferSize);
+  stagingBuffer.cleanup();
 }
 
 void RTXModel::createFaceBuffer() {
@@ -146,4 +149,5 @@ void RTXModel::createFaceBuffer() {
   faceBuffer =
       std::make_unique<Buffer>(context, Buffer::Type::Face, bufferSize);
   faceBuffer->copy(stagingBuffer, bufferSize);
+  stagingBuffer.cleanup();
 }

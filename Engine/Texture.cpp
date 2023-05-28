@@ -32,6 +32,7 @@ Texture::Texture(Context &context, const std::string path) : context(context) {
                           VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
   imageView = image->createImageView(VK_IMAGE_ASPECT_COLOR_BIT);
+  stagingBuffer.cleanup();
 }
 
 Texture::~Texture() {

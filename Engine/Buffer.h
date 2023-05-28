@@ -31,11 +31,14 @@ public:
   void copy(Buffer other, VkDeviceSize size);
   void store(void *data, VkDeviceSize size);
 
+  void cleanup();
+
 private:
   Context &context;
   VkBuffer buffer = VK_NULL_HANDLE;
   VkDeviceMemory memory;
   VkDeviceAddress deviceAddress = 0;
+  bool staging = false;
 };
 
 #endif // TOXENGINE_BUFFER_H_
