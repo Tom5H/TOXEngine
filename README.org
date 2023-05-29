@@ -17,3 +17,4 @@ The TOX Engine is a C++ Vulkan 3D-Engine. It has support for hardware accelerate
 - GLM
 - stb_image
 - tinyobjloader
+- nvvk (extensions_vk.hpp and extensions_vk.cpp to handle loading of extension function pointers) 
