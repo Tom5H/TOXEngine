@@ -24,6 +24,12 @@ To build the raytracing shaders run:
 #+end_src
 you might need to make it executable with the command =chmod +x compile_shaders.sh=
 
+** TOX Engine Application development
+Everything directly required to develop an application using The TOX Engine is contained within the App directory. Look at the ExampleApplication class for a working example.
+
+- IApp specifies Application interface
+- ITOXEnigne specifies the Application interface to The TOX Engine
+
 ** Third party libraries
 - Vulkan SDK
 - GLFW3

@@ -7,8 +7,8 @@
 
 #include <string>
 
-const uint32_t WIDTH = 1024;
-const uint32_t HEIGHT = 1024;
+const uint32_t WINDOW_WIDTH = 1024;
+const uint32_t WINDOW_HEIGHT = 1024;
 
 struct UniformBufferObject {
   alignas(16) glm::mat4 model;
@@ -23,9 +23,11 @@ public:
 
   virtual void run() = 0;
 
+  // currently only supported in IApp::start()   -------------
   virtual void loadModel(const std::string modelPath,
                          const std::string texturePath) = 0;
   virtual void loadRTXModel(const std::string path) = 0;
+  // ---------------------------------------------------------
 
   IApp &app;
 };
