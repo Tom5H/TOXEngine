@@ -22,6 +22,7 @@ public:
 
   VkAccelerationStructureKHR accel;
   VkWriteDescriptorSetAccelerationStructureKHR accelInfo;
+
 private:
   Context &context;
   std::unique_ptr<Buffer> scratch;

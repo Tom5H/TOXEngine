@@ -16,6 +16,7 @@ public:
 
 private:
   Context &context;
+
   VkShaderModule shader;
 };
 

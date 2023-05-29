@@ -21,7 +21,8 @@ public:
     ShaderBindingTable
   };
 
-  Buffer(Context &context, Type type, VkDeviceSize size, const void *data = nullptr);
+  Buffer(Context &context, Type type, VkDeviceSize size,
+         const void *data = nullptr);
   ~Buffer();
 
   VkBuffer get() { return buffer; }
@@ -35,10 +36,13 @@ public:
 
 private:
   Context &context;
-  VkBuffer buffer = VK_NULL_HANDLE;
+
+  VkBuffer buffer;
   VkDeviceMemory memory;
   VkDeviceAddress deviceAddress = 0;
-  bool staging = false;
+
+  bool staging = false; // staging buffers need to be explicitly cleaned
+                        // otherwise there are validation layer complaints
 };
 
 #endif // TOXENGINE_BUFFER_H_

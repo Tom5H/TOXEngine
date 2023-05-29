@@ -14,6 +14,7 @@ public:
 
 private:
   Context &context;
+
   VkSampler sampler;
 };
 

@@ -31,7 +31,8 @@ public:
   VkDescriptorPool descriptorPool;
 
   void createDescriptorSets();
-  void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex, uint32_t currentFrame);
+  void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex,
+                           uint32_t currentFrame);
 
   void refresh();
 
@@ -39,11 +40,11 @@ private:
   Context &context;
   TOXEngine *engine;
   SwapChain *swapChain;
-  
+
   std::unique_ptr<Image> depthImage;
-  
+
   std::vector<std::unique_ptr<Buffer>> uniformBuffers;
-  
+
   std::vector<VkDescriptorSet> descriptorSets;
 
   void createRenderPass();

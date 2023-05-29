@@ -16,10 +16,10 @@ class SwapChain;
 class Raytracer {
 public:
   Raytracer(Context &context, TOXEngine *engine, SwapChain *swapChain);
-  
+
   void createDescriptorSet();
   void recordCommandBuffer(const VkCommandBuffer &commandBuffer);
-  
+
   VkDescriptorPool descriptorPool;
   VkDescriptorSetLayout descriptorSetLayout;
 
@@ -40,7 +40,7 @@ private:
   Context &context;
   TOXEngine *engine;
   SwapChain *swapChain;
-  
+
   VkDescriptorSet descriptorSet;
 
   std::unique_ptr<Image> outputImage;

@@ -35,6 +35,7 @@ private:
   void createCommandPool();
 
   Context *context;
+
   VkDevice device;
   VkQueue graphicsQueue;
   VkQueue presentQueue;
