@@ -12,21 +12,21 @@
 class Context;
 
 class Model {
-  friend class SwapChain;
-
 public:
   Model(Context &context, const std::string path);
 
   uint32_t getIndexCount() const { return nbIndices; }
   uint32_t getVertexCount() const { return nbVertices; }
 
+  std::unique_ptr<Buffer> vertexBuffer;
+  std::unique_ptr<Buffer> indexBuffer;
+
+  std::vector<uint32_t> indices;
+  
 private:
   Context &context;
 
-  std::vector<uint32_t> indices;
   std::vector<Vertex> vertices;
-  std::unique_ptr<Buffer> vertexBuffer;
-  std::unique_ptr<Buffer> indexBuffer;
 
   void createVertexBuffer();
   void createIndexBuffer();

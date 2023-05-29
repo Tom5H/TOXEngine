@@ -3,12 +3,14 @@
 
 #include "Buffer.h"
 #include "Image.h"
+#include "Rasterizer.h"
 
 #include <vulkan/vulkan.h>
 
 #include <cstdint>
 #include <memory>
 #include <vector>
+#include <vulkan/vulkan_core.h>
 
 class Context;
 class TOXEngine;
@@ -19,37 +21,36 @@ public:
   ~SwapChain();
 
   VkSwapchainKHR get() { return swapChain; }
-  uint32_t width() { return swapChainExtent.width; }
-  uint32_t height() { return swapChainExtent.height; }
-  VkDescriptorSetLayout getDescriptorSetLayout() { return descriptorSetLayout; }
+  VkExtent2D getExtent() { return swapChainExtent; }
+  uint32_t getWidth() { return swapChainExtent.width; }
+  uint32_t getHeight() { return swapChainExtent.height; }
+  VkFormat getSwapChainImageFormat() { return swapChainImageFormat; }
+  VkFramebuffer getFramebuffer(uint32_t index) {
+    return swapChainFramebuffers[index];
+  }
 
-  void create();
-  void cleanup();
-  void recreate();
+  void refresh();
 
   void drawFrame();
-  void createDescriptorSets();
+
   void createRTDescriptorSet();
   void copyToBackImage(Image &image);
 
   bool useRaytracer = true;
 
 private:
+  void create();
+  void cleanup();
+  void recreate();
+
   VkSurfaceFormatKHR chooseSwapSurfaceFormat(
       const std::vector<VkSurfaceFormatKHR> &availableFormats);
   VkPresentModeKHR chooseSwapPresentMode(
       const std::vector<VkPresentModeKHR> &availablePresentModes);
   VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities);
   void createImageViews();
-  void createRenderPass();
-  void createDescriptorSetLayout();
-  void createGraphicsPipeline();
-  void createDepthResources();
   void createFramebuffers();
-  void createUniformBuffers();
-  void createDescriptorPool();
   void createCommandBuffers();
-  void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
   void createSyncObjects();
 
   void createRTDescriptorSetLayout();
@@ -61,6 +62,7 @@ private:
 
   Context &context;
   TOXEngine *engine;
+
   VkSwapchainKHR swapChain;
   std::vector<VkImage> swapChainImages;
   VkFormat swapChainImageFormat;
@@ -68,22 +70,7 @@ private:
   std::vector<VkImageView> swapChainImageViews;
   std::vector<VkFramebuffer> swapChainFramebuffers;
 
-  // rasterizer
-
-  VkRenderPass renderPass;
-  VkDescriptorSetLayout descriptorSetLayout;
-  VkPipelineLayout pipelineLayout;
-  VkPipeline graphicsPipeline;
-
-  std::unique_ptr<Image> depthImage;
-  VkDeviceMemory depthImageMemory;
-  VkImageView depthImageView;
-
-  std::vector<std::unique_ptr<Buffer>> uniformBuffers;
-  std::vector<void *> uniformBuffersMapped;
-
-  VkDescriptorPool descriptorPool;
-  std::vector<VkDescriptorSet> descriptorSets;
+  std::unique_ptr<Rasterizer> rasterizer;
 
   // raytracer
 

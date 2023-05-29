@@ -17,7 +17,7 @@ void TOXEngine::initVulkan() {
   // TODO factory selecting Model or RTXModel
   model = std::make_unique<Model>(context, MODEL_PATH);
   rtx_model = std::make_unique<RTXModel>(context, RTX_MODEL_PATH);
-  swapChain->createDescriptorSets();
+  swapChain->refresh();
   swapChain->createRTDescriptorSet();
 }
 
@@ -27,7 +27,7 @@ void TOXEngine::mainLoop() {
     deltaTime = currentFrame - lastFrame;
     lastFrame = currentFrame;
 
-    //std::cout << "fps: " << 1 / deltaTime << std::endl;
+    std::cout << "fps: " << 1 / deltaTime << std::endl;
 
     glfwPollEvents();
     processInputs();
