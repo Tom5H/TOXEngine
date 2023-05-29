@@ -20,12 +20,6 @@
 const uint32_t WIDTH = 1024;
 const uint32_t HEIGHT = 1024;
 
-const std::string MODEL_PATH = "../resources/models/viking_room.obj";
-const std::string TEXTURE_PATH = "../resources/textures/viking_room.png";
-
-const std::string RTX_MODEL_PATH =
-    "../resources/models/CornellBox-Original.obj";
-
 struct UniformBufferObject {
   alignas(16) glm::mat4 model;
   alignas(16) glm::mat4 view;
@@ -43,6 +37,9 @@ public:
   ~TOXEngine() {}
 
   void run();
+
+  void loadModel(const std::string modelPath, const std::string texturePath);
+  void loadRTXModel(const std::string path);
 
   App app;
   Context context;

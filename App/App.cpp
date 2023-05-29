@@ -5,6 +5,12 @@
 #include <chrono>
 #include <cstring>
 
+void App::start() {
+  // todo generate geomety here
+  engine->loadModel("../resources/models/viking_room.obj", "../resources/textures/viking_room.png");
+  engine->loadRTXModel("../resources/models/CornellBox-Original.obj");
+}
+
 void App::update(void *uniformBufferMapped, uint32_t width, uint32_t height) {
   static auto startTime = std::chrono::high_resolution_clock::now();
 

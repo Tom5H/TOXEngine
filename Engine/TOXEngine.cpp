@@ -1,4 +1,5 @@
 #include "TOXEngine.h"
+#include "Texture.h"
 #include <memory>
 
 #define GLFW_INCLUDE_VULKAN
@@ -12,11 +13,7 @@ void TOXEngine::run() {
 void TOXEngine::initVulkan() {
   swapChain = std::make_unique<SwapChain>(context, this);
   sampler = std::make_unique<Sampler>(context);
-  texture = std::make_unique<Texture>(context, TEXTURE_PATH);
-  // TODO interface function to load models for application (in startup first)
-  // TODO factory selecting Model or RTXModel
-  model = std::make_unique<Model>(context, MODEL_PATH);
-  rtx_model = std::make_unique<RTXModel>(context, RTX_MODEL_PATH);
+  app.start();
   swapChain->refresh();
 }
 
@@ -26,7 +23,7 @@ void TOXEngine::mainLoop() {
     deltaTime = currentFrame - lastFrame;
     lastFrame = currentFrame;
 
-    std::cout << "fps: " << 1 / deltaTime << std::endl;
+    //std::cout << "fps: " << 1 / deltaTime << std::endl;
 
     glfwPollEvents();
     processInputs();
@@ -61,4 +58,16 @@ void TOXEngine::processInputs() {
   } else {
     r = true;
   }
+}
+
+// todo vectors of models and textures -> push back
+void TOXEngine::loadModel(const std::string modelPath,
+                          const std::string texturePath) {
+  texture = std::make_unique<Texture>(context, texturePath);
+  model = std::make_unique<Model>(context, modelPath);
+}
+
+// todo vector of models -> push back
+void TOXEngine::loadRTXModel(const std::string path) {
+  rtx_model = std::make_unique<RTXModel>(context, path);
 }
