@@ -14,6 +14,12 @@ public:
     updateCameraVectors();
   }
 
+  bool getHasMoved() {
+    bool val = hasMoved;
+    hasMoved = false;
+    return val;
+  }
+
   glm::mat4 GetViewMatrix() {
     return glm::lookAt(position, position + front, up);
   }
@@ -24,6 +30,7 @@ public:
   }
 
   void ProcessKeyboard(Direction direction, float deltaTime) {
+    hasMoved = true;
     float velocity = movementSpeed * deltaTime;
     if (direction == Direction::Forward)
       position += front * velocity;
@@ -41,6 +48,7 @@ public:
 
   void ProcessMouseMovement(float xpos, float ypos,
                             bool constrainPitch = true) {
+    hasMoved = true;
     if (firstMouse) {
       lastX = xpos;
       lastY = ypos;
@@ -64,6 +72,7 @@ public:
   }
 
   void ProcessMouseScroll(float yoffset) {
+    hasMoved = true;
     zoom -= (float)yoffset;
     if (zoom < 1.0f)
       zoom = 1.0f;
@@ -93,6 +102,7 @@ private:
   float zoom = 45.0f;
   float lastX;
   float lastY;
+  bool hasMoved = false;
 };
 
 #endif // TOXENGINE_CAMERA_H_

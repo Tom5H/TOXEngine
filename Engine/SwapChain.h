@@ -119,6 +119,7 @@ private:
 
   uint32_t currentFrame = 0;
   uint32_t frame = 0;
+  uint32_t standingFrames = 0;
   bool vsync = false;
 };
 

@@ -41,7 +41,8 @@ SwapChain::~SwapChain() {
 
   vkDestroyDescriptorPool(context.device->get(), rtDescriptorPool, nullptr);
 
-  vkDestroyDescriptorSetLayout(context.device->get(), rtDescriptorSetLayout, nullptr);
+  vkDestroyDescriptorSetLayout(context.device->get(), rtDescriptorSetLayout,
+                               nullptr);
 
   vkDestroyPipeline(context.device->get(), graphicsPipeline, nullptr);
   vkDestroyPipelineLayout(context.device->get(), pipelineLayout, nullptr);
@@ -124,7 +125,7 @@ void SwapChain::create() {
 
 void SwapChain::cleanup() {
   vkDestroyImageView(context.device->get(), rtOutputImageView, nullptr);
-  
+
   vkDestroyImageView(context.device->get(), depthImageView, nullptr);
   vkFreeMemory(context.device->get(), depthImageMemory, nullptr);
 
@@ -1004,17 +1005,21 @@ void SwapChain::createRTPipeline() {
   group.closestHitShader = eClosestHit;
   rtShaderGroups.push_back(group);
 
-  VkPushConstantRange pushRange{};
-  pushRange.size = sizeof(int);
-  pushRange.stageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR;
+  std::array<VkPushConstantRange, 2> pushRanges{};
+
+  pushRanges[0].size = sizeof(int);
+  pushRanges[0].stageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR;
+  pushRanges[1].size = sizeof(int);
+  pushRanges[1].offset = sizeof(int);
+  pushRanges[1].stageFlags = VK_SHADER_STAGE_RAYGEN_BIT_KHR;
 
   VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo{};
   pipelineLayoutCreateInfo.sType =
       VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
   pipelineLayoutCreateInfo.setLayoutCount = 1;
   pipelineLayoutCreateInfo.pSetLayouts = &rtDescriptorSetLayout;
-  pipelineLayoutCreateInfo.pushConstantRangeCount = 1;
-  pipelineLayoutCreateInfo.pPushConstantRanges = &pushRange;
+  pipelineLayoutCreateInfo.pushConstantRangeCount = pushRanges.size();
+  pipelineLayoutCreateInfo.pPushConstantRanges = pushRanges.data();
 
   vkCreatePipelineLayout(context.device->get(), &pipelineLayoutCreateInfo,
                          nullptr, &rtPipelineLayout);
@@ -1095,6 +1100,12 @@ void SwapChain::raytrace(const VkCommandBuffer &commandBuffer) {
                           rtPipelineLayout, 0, 1, &rtDescriptorSet, 0, nullptr);
   vkCmdPushConstants(commandBuffer, rtPipelineLayout,
                      VK_SHADER_STAGE_RAYGEN_BIT_KHR, 0, sizeof(int), &frame);
+  if(context.camera.getHasMoved()){
+    standingFrames = 0;
+  }
+  vkCmdPushConstants(commandBuffer, rtPipelineLayout,
+                     VK_SHADER_STAGE_RAYGEN_BIT_KHR, sizeof(int), sizeof(int),
+                     &standingFrames);
   vkCmdTraceRaysKHR(commandBuffer, &raygenRegion, &missRegion, &hitRegion,
                     &callRegion, swapChainExtent.width, swapChainExtent.height,
                     2);
@@ -1105,6 +1116,7 @@ void SwapChain::raytrace(const VkCommandBuffer &commandBuffer) {
   }
   context.device->waitIdle();
   frame++;
+  standingFrames++;
 }
 
 void SwapChain::createRTUniformBuffer() {

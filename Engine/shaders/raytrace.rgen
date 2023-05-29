@@ -14,6 +14,7 @@ layout(binding = 5, set = 0) uniform Camera {
 
 layout(push_constant) uniform PushConstants {
     int frame;
+    int standingFrames;
 } pushConstants;
 
 layout(location = 0) rayPayloadEXT hitPayload payload;
@@ -47,7 +48,7 @@ vec3 sampleDirection(float rand1, float rand2, vec3 normal)
 
 void main()
 {
-    int maxSamples = 2;
+    int maxSamples = 5;
     vec3 color = vec3(0.0);
     for(uint sampleNum = 0; sampleNum < maxSamples; sampleNum++){
         // Calc seed
@@ -92,8 +93,12 @@ void main()
     }
     color /= maxSamples;
     
-    //vec4 oldColor = imageLoad(outputImage, ivec2(gl_LaunchIDEXT.xy));
     vec4 newColor = vec4(color, 1.0);
-    //newColor = (newColor + (oldColor * pushConstants.frame)) / (pushConstants.frame + 1);
+
+    if(pushConstants.standingFrames > 0) {
+      vec4 oldColor = imageLoad(outputImage, ivec2(gl_LaunchIDEXT.xy));
+      newColor = (newColor + (oldColor * pushConstants.standingFrames)) / (pushConstants.standingFrames + 1);
+    }
+
     imageStore(outputImage, ivec2(gl_LaunchIDEXT.xy), newColor);
 }
