@@ -6,7 +6,7 @@
 #include <cstring>
 
 void App::start() {
-  // todo generate geomety here
+  // todo generate geomety here (in child class)
   engine->loadModel("../resources/models/viking_room.obj", "../resources/textures/viking_room.png");
   engine->loadRTXModel("../resources/models/CornellBox-Original.obj");
 }
