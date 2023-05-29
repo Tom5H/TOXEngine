@@ -12,6 +12,15 @@ The Vulkan SDK, GLFW3 and GLM libraries need to be installed on your system.
 
 #+end_src
 
+*** Building shaders
+To build the raytracing shaders run:
+#+begin_src shell
+
+  ./compile_shaders.sh
+
+#+end_src
+you might need to make it executable with the command =chmod +x compile_shaders.sh=
+
 ** Third party libraries
 - Vulkan SDK
 - GLFW3
