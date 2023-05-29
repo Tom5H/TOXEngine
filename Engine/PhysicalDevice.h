@@ -1,5 +1,5 @@
-#ifndef TOXENGINE_PHYSICALDEVICE_H_
-#define TOXENGINE_PHYSICALDEVICE_H_
+#ifndef TOXENGINE_ENGINE_PHYSICALDEVICE_H_
+#define TOXENGINE_ENGINE_PHYSICALDEVICE_H_
 
 #include <vulkan/vulkan.h>
 
@@ -49,4 +49,4 @@ private:
   VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
 };
 
-#endif // TOXENGINE_PHYSICALDEVICE_H_
+#endif // TOXENGINE_ENGINE_PHYSICALDEVICE_H_

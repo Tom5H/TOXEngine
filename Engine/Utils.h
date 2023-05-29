@@ -1,5 +1,5 @@
-#ifndef TOXENGINE_UTILS_H_
-#define TOXENGINE_UTILS_H_
+#ifndef TOXENGINE_ENGINE_UTILS_H_
+#define TOXENGINE_ENGINE_UTILS_H_
 
 #include <vector>
 #include <fstream>
@@ -22,4 +22,4 @@ static std::vector<char> readFile(const std::string &filename) {
   return buffer;
 }
 
-#endif // TOXENGINE_UTILS_H_
+#endif // TOXENGINE_ENGINE_UTILS_H_

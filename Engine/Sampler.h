@@ -1,5 +1,5 @@
-#ifndef TOXENGINE_SAMPLER_H_
-#define TOXENGINE_SAMPLER_H_
+#ifndef TOXENGINE_ENGINE_SAMPLER_H_
+#define TOXENGINE_ENGINE_SAMPLER_H_
 
 #include <vulkan/vulkan.h>
 
@@ -18,4 +18,4 @@ private:
   VkSampler sampler;
 };
 
-#endif // TOXENGINE_SAMPLER_H_
+#endif // TOXENGINE_ENGINE_SAMPLER_H_

@@ -1,5 +1,5 @@
-#ifndef TOXENGINE_IMAGE_H_
-#define TOXENGINE_IMAGE_H_
+#ifndef TOXENGINE_ENGINE_IMAGE_H_
+#define TOXENGINE_ENGINE_IMAGE_H_
 
 #include <vulkan/vulkan.h>
 
@@ -31,4 +31,4 @@ private:
   VkFormat format;
 };
 
-#endif
+#endif // TOXENGINE_ENGINE_IMAGE_H_

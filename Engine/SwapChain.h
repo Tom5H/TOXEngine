@@ -1,5 +1,5 @@
-#ifndef TOXENGINE_SWAPCHAIN_H_
-#define TOXENGINE_SWAPCHAIN_H_
+#ifndef TOXENGINE_ENGINE_SWAPCHAIN_H_
+#define TOXENGINE_ENGINE_SWAPCHAIN_H_
 
 #include "Buffer.h"
 #include "Image.h"
@@ -75,4 +75,4 @@ private:
   bool vsync = false;
 };
 
-#endif // TOXENGINE_SWAPCHAIN_H_
+#endif // TOXENGINE_ENGINE_SWAPCHAIN_H_

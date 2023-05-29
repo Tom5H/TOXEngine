@@ -1,5 +1,5 @@
-#ifndef TOXENGINE_VERTEX_H_
-#define TOXENGINE_VERTEX_H_
+#ifndef TOXENGINE_ENGINE_VERTEX_H_
+#define TOXENGINE_ENGINE_VERTEX_H_
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
@@ -63,4 +63,4 @@ template <> struct hash<Vertex> {
   
 } // namespace std
 
-#endif // TOXENGINE_VERTEX_H_
+#endif // TOXENGINE_ENGINE_VERTEX_H_

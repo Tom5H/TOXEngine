@@ -1,5 +1,5 @@
-#ifndef TOXENGINE_CONTEXT_H_
-#define TOXENGINE_CONTEXT_H_
+#ifndef TOXENGINE_ENGINE_CONTEXT_H_
+#define TOXENGINE_ENGINE_CONTEXT_H_
 
 #include "Camera.h"
 #include "Device.h"
@@ -104,4 +104,4 @@ private:
                                      const VkAllocationCallbacks *pAllocator);
 };
 
-#endif
+#endif // TOXENGINE_ENGINE_CONTEXT_H_

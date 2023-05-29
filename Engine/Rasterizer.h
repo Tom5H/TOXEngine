@@ -1,5 +1,5 @@
-#ifndef TOXENGINE_RASTERIZER_H_
-#define TOXENGINE_RASTERIZER_H_
+#ifndef TOXENGINE_ENGINE_RASTERIZER_H_
+#define TOXENGINE_ENGINE_RASTERIZER_H_
 
 #include "Buffer.h"
 #include "Context.h"
@@ -55,4 +55,4 @@ private:
   void createDescriptorPool();
 };
 
-#endif // TOXENGINE_RASTERIZER_H_
+#endif // TOXENGINE_ENGINE_RASTERIZER_H_

@@ -1,5 +1,5 @@
-#ifndef ITOXENGINE_H_
-#define ITOXENGINE_H_
+#ifndef TOXENGINE_APP_ITOXENGINE_H_
+#define TOXENGINE_APP_ITOXENGINE_H_
 
 #include "IApp.h"
 
@@ -32,4 +32,4 @@ public:
   IApp &app;
 };
 
-#endif // ITOXENGINE_H_
+#endif // TOXENGINE_APP_ITOXENGINE_H_

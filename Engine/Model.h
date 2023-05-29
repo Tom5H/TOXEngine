@@ -1,5 +1,5 @@
-#ifndef TOXENGINE_MODEL_H_
-#define TOXENGINE_MODEL_H_
+#ifndef TOXENGINE_ENGINE_MODEL_H_
+#define TOXENGINE_ENGINE_MODEL_H_
 
 #include "Buffer.h"
 #include "Vertex.h"
@@ -35,4 +35,4 @@ private:
   uint32_t nbVertices;
 };
 
-#endif // TOXENGINE_MODEL_H_
+#endif // TOXENGINE_ENGINE_MODEL_H_

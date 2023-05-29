@@ -1,5 +1,5 @@
-#ifndef TOXENGINE_RTXMODEL_H_
-#define TOXENGINE_RTXMODEL_H_
+#ifndef TOXENGINE_ENGINE_RTXMODEL_H_
+#define TOXENGINE_ENGINE_RTXMODEL_H_
 
 #include "AccelerationStructure.h"
 #include "Buffer.h"
@@ -50,4 +50,4 @@ private:
   void load(const std::string path);
 };
 
-#endif // TOXENGINE_RTXMODEL_H_
+#endif // TOXENGINE_ENGINE_RTXMODEL_H_

@@ -1,5 +1,5 @@
-#ifndef TOXENGINE_TEXTURE_H_
-#define TOXENGINE_TEXTURE_H_
+#ifndef TOXENGINE_ENGINE_TEXTURE_H_
+#define TOXENGINE_ENGINE_TEXTURE_H_
 
 #include "Image.h"
 
@@ -22,4 +22,4 @@ private:
   VkImageView imageView;
 };
 
-#endif // TOXENGINE_TEXTURE_H_
+#endif // TOXENGINE_ENGINE_TEXTURE_H_

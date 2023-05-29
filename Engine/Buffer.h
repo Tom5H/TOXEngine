@@ -1,5 +1,5 @@
-#ifndef TOXENGINE_BUFFER_H_
-#define TOXENGINE_BUFFER_H_
+#ifndef TOXENGINE_ENGINE_BUFFER_H_
+#define TOXENGINE_ENGINE_BUFFER_H_
 
 #include <vulkan/vulkan.h>
 
@@ -45,4 +45,4 @@ private:
                         // otherwise there are validation layer complaints
 };
 
-#endif // TOXENGINE_BUFFER_H_
+#endif // TOXENGINE_ENGINE_BUFFER_H_

@@ -1,5 +1,5 @@
-#ifndef TOXENGINE_CAMERA_H_
-#define TOXENGINE_CAMERA_H_
+#ifndef TOXENGINE_ENGINE_CAMERA_H_
+#define TOXENGINE_ENGINE_CAMERA_H_
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -51,4 +51,4 @@ private:
   bool hasMoved = false;
 };
 
-#endif // TOXENGINE_CAMERA_H_
+#endif // TOXENGINE_ENGINE_CAMERA_H_

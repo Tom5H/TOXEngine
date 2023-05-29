@@ -1,5 +1,5 @@
-#ifndef TOXENGINE_DEVICE_H_
-#define TOXENGINE_DEVICE_H_
+#ifndef TOXENGINE_ENGINE_DEVICE_H_
+#define TOXENGINE_ENGINE_DEVICE_H_
 
 #include "PhysicalDevice.h"
 
@@ -43,4 +43,4 @@ private:
   std::shared_ptr<PhysicalDevice> physicalDevice;
 };
 
-#endif // TOXENGINE_DEVICE_H_
+#endif // TOXENGINE_ENGINE_DEVICE_H_

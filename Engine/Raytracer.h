@@ -1,5 +1,5 @@
-#ifndef TOXENGINE_RAYTRACER_H_
-#define TOXENGINE_RAYTRACER_H_
+#ifndef TOXENGINE_ENGINE_RAYTRACER_H_
+#define TOXENGINE_ENGINE_RAYTRACER_H_
 
 #include "Buffer.h"
 #include "Context.h"
@@ -61,4 +61,4 @@ private:
   uint32_t standingFrames = 0;
 };
 
-#endif // TOXENGINE_RAYTRACER_H_
+#endif // TOXENGINE_ENGINE_RAYTRACER_H_

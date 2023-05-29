@@ -1,5 +1,5 @@
-#ifndef TOXENGINE_FACE_H_
-#define TOXENGINE_FACE_H_
+#ifndef TOXENGINE_ENGINE_FACE_H_
+#define TOXENGINE_ENGINE_FACE_H_
 
 #include <glm/glm.hpp>
 
@@ -8,4 +8,4 @@ struct Face {
   glm::vec3 emission;
 };
 
-#endif // TOXENGINE_FACE_H_
+#endif // TOXENGINE_ENGINE_FACE_H_

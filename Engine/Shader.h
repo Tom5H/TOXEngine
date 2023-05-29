@@ -1,5 +1,5 @@
-#ifndef TOXENGINE_SHADER_H_
-#define TOXENGINE_SHADER_H_
+#ifndef TOXENGINE_ENGINE_SHADER_H_
+#define TOXENGINE_ENGINE_SHADER_H_
 
 #include <vulkan/vulkan.h>
 
@@ -20,4 +20,4 @@ private:
   VkShaderModule shader;
 };
 
-#endif // TOXENGINE_SHADER_H_
+#endif // TOXENGINE_ENGINE_SHADER_H_
