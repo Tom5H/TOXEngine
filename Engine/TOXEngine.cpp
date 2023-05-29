@@ -18,7 +18,6 @@ void TOXEngine::initVulkan() {
   model = std::make_unique<Model>(context, MODEL_PATH);
   rtx_model = std::make_unique<RTXModel>(context, RTX_MODEL_PATH);
   swapChain->refresh();
-  swapChain->createRTDescriptorSet();
 }
 
 void TOXEngine::mainLoop() {
