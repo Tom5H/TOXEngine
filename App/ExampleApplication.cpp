@@ -1,4 +1,4 @@
-#include "App.h"
+#include "ExampleApplication.h"
 
 #include "ITOXEngine.h"
 
@@ -8,15 +8,16 @@
 #include <chrono>
 #include <cstring>
 
-void App::start(ITOXEngine *engine) {
+void ExampleApplication::start(ITOXEngine *engine) {
   // todo generate geomety here (in child class)
   engine->loadModel("../resources/models/viking_room.obj",
                     "../resources/textures/viking_room.png");
   engine->loadRTXModel("../resources/models/CornellBox-Original.obj");
 }
 
-void App::update(ITOXEngine *const engine, void *const uniformBufferMapped,
-                 const uint32_t width, const uint32_t height) {
+void ExampleApplication::update(ITOXEngine *const engine,
+                                void *const uniformBufferMapped,
+                                const uint32_t width, const uint32_t height) {
   static auto startTime = std::chrono::high_resolution_clock::now();
 
   auto currentTime = std::chrono::high_resolution_clock::now();

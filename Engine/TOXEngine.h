@@ -3,7 +3,6 @@
 
 #include "../App/ITOXEngine.h"
 
-#include "../App/App.h"
 #include "Buffer.h"
 #include "Context.h"
 #include "Model.h"
@@ -26,7 +25,7 @@ struct RTUniformBufferObject {
 
 class TOXEngine : public ITOXEngine {
 public:
-  TOXEngine(App &app) : ITOXEngine(app) {}
+  TOXEngine(IApp &app) : ITOXEngine(app) {}
   ~TOXEngine() {}
 
   void run() override;

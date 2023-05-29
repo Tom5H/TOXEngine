@@ -1,7 +1,7 @@
 #ifndef ITOXENGINE_H_
 #define ITOXENGINE_H_
 
-#include "App.h"
+#include "IApp.h"
 
 #include <glm/glm.hpp>
 
@@ -18,7 +18,7 @@ struct UniformBufferObject {
 
 class ITOXEngine {
 public:
-  ITOXEngine(App &app) : app(app) {}
+  ITOXEngine(IApp &app) : app(app) {}
   ~ITOXEngine() = default;
 
   virtual void run() = 0;
@@ -27,7 +27,7 @@ public:
                          const std::string texturePath) = 0;
   virtual void loadRTXModel(const std::string path) = 0;
 
-  App &app;
+  IApp &app;
 };
 
 #endif // ITOXENGINE_H_

@@ -1,8 +1,8 @@
 #include "../Engine/TOXEngine.h"
-#include "App.h"
+#include "ExampleApplication.h"
 
 int main() {
-  App app;
+  ExampleApplication app;
   TOXEngine engine(app);
 
   try {
