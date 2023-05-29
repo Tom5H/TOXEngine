@@ -33,7 +33,7 @@ struct RTUniformBufferObject {
 
 class TOXEngine {
 public:
-  TOXEngine() : app(this) {}
+  TOXEngine(App &app) : app(app) {}
   ~TOXEngine() {}
 
   void run();
@@ -41,7 +41,7 @@ public:
   void loadModel(const std::string modelPath, const std::string texturePath);
   void loadRTXModel(const std::string path);
 
-  App app;
+  App &app;
   Context context;
 
   std::unique_ptr<SwapChain> swapChain;

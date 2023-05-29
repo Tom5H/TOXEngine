@@ -13,7 +13,7 @@ void TOXEngine::run() {
 void TOXEngine::initVulkan() {
   swapChain = std::make_unique<SwapChain>(context, this);
   sampler = std::make_unique<Sampler>(context);
-  app.start();
+  app.start(this);
   swapChain->refresh();
 }
 

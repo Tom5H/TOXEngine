@@ -7,12 +7,12 @@ class TOXEngine;
 
 class App {
 public:
-  App(TOXEngine *engine) : engine(engine) {}
-  
-  virtual void start();
-  virtual void update(void *uniformBufferMapped, uint32_t width, uint32_t height);
-private:
-  TOXEngine *engine;
+  App() = default;
+  virtual ~App() = default;
+
+  virtual void start(TOXEngine *const engine);
+  virtual void update(TOXEngine *const engine, void *const uniformBufferMapped,
+                      const uint32_t width, const uint32_t height);
 };
 
 #endif // APP_H_

@@ -301,8 +301,8 @@ void SwapChain::drawFrame() {
       static_cast<float>(getWidth()), static_cast<float>(getHeight()));
   memcpy(raytracer->uniformBufferMapped, &rtUbo, sizeof(rtUbo));
 
-  engine->app.update(rasterizer->uniformBuffersMapped[currentFrame], getWidth(),
-                     getHeight());
+  engine->app.update(engine, rasterizer->uniformBuffersMapped[currentFrame],
+                     getWidth(), getHeight());
 
   vkResetFences(context.device->get(), 1, &inFlightFences[currentFrame]);
 
