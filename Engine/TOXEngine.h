@@ -1,6 +1,8 @@
 #ifndef TOXENGINE_H_
 #define TOXENGINE_H_
 
+#include "../App/ITOXEngine.h"
+
 #include "../App/App.h"
 #include "Buffer.h"
 #include "Context.h"
@@ -17,31 +19,22 @@
 #include <memory>
 #include <vector>
 
-const uint32_t WIDTH = 1024;
-const uint32_t HEIGHT = 1024;
-
-struct UniformBufferObject {
-  alignas(16) glm::mat4 model;
-  alignas(16) glm::mat4 view;
-  alignas(16) glm::mat4 proj;
-};
-
 struct RTUniformBufferObject {
   alignas(16) glm::mat4 view;
   alignas(16) glm::mat4 proj;
 };
 
-class TOXEngine {
+class TOXEngine : public ITOXEngine {
 public:
-  TOXEngine(App &app) : app(app) {}
+  TOXEngine(App &app) : ITOXEngine(app) {}
   ~TOXEngine() {}
 
-  void run();
+  void run() override;
 
-  void loadModel(const std::string modelPath, const std::string texturePath);
-  void loadRTXModel(const std::string path);
+  void loadModel(const std::string modelPath, const std::string texturePath) override;
+  void loadRTXModel(const std::string path) override;
 
-  App &app;
+  //App &app;
   Context context;
 
   std::unique_ptr<SwapChain> swapChain;

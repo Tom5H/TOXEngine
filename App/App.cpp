@@ -1,18 +1,21 @@
 #include "App.h"
 
-#include "../Engine/TOXEngine.h"
+#include "ITOXEngine.h"
+
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include <chrono>
 #include <cstring>
 
-void App::start(TOXEngine *engine) {
+void App::start(ITOXEngine *engine) {
   // todo generate geomety here (in child class)
   engine->loadModel("../resources/models/viking_room.obj",
                     "../resources/textures/viking_room.png");
   engine->loadRTXModel("../resources/models/CornellBox-Original.obj");
 }
 
-void App::update(TOXEngine *const engine, void *const uniformBufferMapped,
+void App::update(ITOXEngine *const engine, void *const uniformBufferMapped,
                  const uint32_t width, const uint32_t height) {
   static auto startTime = std::chrono::high_resolution_clock::now();
 
