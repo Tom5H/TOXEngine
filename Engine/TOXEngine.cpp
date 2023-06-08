@@ -18,12 +18,21 @@ void TOXEngine::initVulkan() {
 }
 
 void TOXEngine::mainLoop() {
+  static uint32_t fps_counter = 0;
+  static float fps_accumulated = 0;
+  
   while (!glfwWindowShouldClose(context.window)) {
     float currentFrame = static_cast<float>(glfwGetTime());
     deltaTime = currentFrame - lastFrame;
     lastFrame = currentFrame;
 
-    //std::cout << "fps: " << 1 / deltaTime << std::endl;
+    fps_accumulated += deltaTime;
+    fps_counter++;
+    if(fps_counter >= 1000) {
+      std::cout << "fps: " << fps_counter / fps_accumulated << std::endl;
+      fps_counter = 0;
+      fps_accumulated = 0;
+    }
 
     glfwPollEvents();
     processInputs();
